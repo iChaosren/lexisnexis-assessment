@@ -1,6 +1,7 @@
-import {Component, inject, input, OnChanges, output, signal, SimpleChanges} from '@angular/core';
+import {Component, computed, inject, input, OnChanges, output, signal, SimpleChanges} from '@angular/core';
 import {ApiService} from '../api.service';
 import {OrderResponse} from '../dtos/order-response';
+import {Currency} from '../dtos/currency';
 
 // Assessment excerpt: “Shows enough detail for a user to verify that totals and status look correct.”
 @Component({
@@ -31,6 +32,22 @@ export class OrderDetail implements OnChanges {
       this.refetch();
     }
   }
+
+  currencyPrefix = computed(() => {
+    if (this.order()) {
+      switch (this.order()?.currency ?? Currency.ZAR) {
+        case Currency.USD:
+          return '$';
+        case Currency.EUR:
+          return '€';
+        case Currency.ZAR:
+        default:
+          return 'R'
+      }
+    }
+
+    return '';
+  })
 
   refetch() {
     this.api.getOrder(this.id()).subscribe({

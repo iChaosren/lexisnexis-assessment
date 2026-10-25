@@ -1,86 +1,90 @@
-<div class="modal is-active" role="dialog" aria-modal="true" aria-labelledby="order-detail-title">
+<div [class]="'modal ' + id() ? 'is-active' : ''" role="dialog" aria-modal="true" aria-labelledby="order-detail-title">
   <div class="modal-background"></div>
   <div class="modal-card">
     <header class="modal-card-head">
-      <h2 class="modal-card-title" id="order-detail-title">Order detail</h2>
-      <button class="delete" type="button" aria-label="Close"></button>
+      <h2 class="modal-card-title" id="order-detail-title">Order Detail</h2>
+      <button class="delete" type="button" aria-label="Close" (click)="onClose.emit()"></button>
     </header>
-    <section class="modal-card-body">
-      <div class="box">
-        <dl class="columns is-multiline">
-          <div class="column is-half">
-            <dt class="has-text-weight-semibold">Reference</dt>
-            <dd>&mdash;</dd>
-          </div>
-          <div class="column is-half">
-            <dt class="has-text-weight-semibold">Status</dt>
-            <dd>&mdash;</dd>
-          </div>
-          <div class="column is-half">
-            <dt class="has-text-weight-semibold">Customer</dt>
-            <dd>&mdash;</dd>
-          </div>
-          <div class="column is-half">
-            <dt class="has-text-weight-semibold">Email</dt>
-            <dd>&mdash;</dd>
-          </div>
-          <div class="column is-half">
-            <dt class="has-text-weight-semibold">Created</dt>
-            <dd>&mdash;</dd>
-          </div>
-          <div class="column is-half">
-            <dt class="has-text-weight-semibold">Currency</dt>
-            <dd>&mdash;</dd>
-          </div>
-        </dl>
+    @if (loading()) {
+      <section class="modal-card-body">
+        <div class="loader is-loading"></div>
+      </section>
+    }
 
-        <div class="table-container">
-          <table class="table is-fullwidth">
-            <thead>
-              <tr>
-                <th scope="col">SKU</th>
-                <th scope="col">Item</th>
-                <th scope="col">Quantity</th>
-                <th scope="col" class="has-text-right">Unit price</th>
-                <th scope="col" class="has-text-right">Line total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colspan="5" class="has-text-grey">Order lines go here.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <dl class="has-text-right">
-          <dt class="has-text-weight-semibold">Subtotal</dt>
-          <dd class="mb-2">&mdash;</dd>
-          <dt class="has-text-weight-semibold">Tax</dt>
-          <dd class="mb-2">&mdash;</dd>
-          <dt class="has-text-weight-semibold">Total</dt>
-          <dd>&mdash;</dd>
-        </dl>
-      </div>
-
-      <div class="box">
-        <div class="field">
-          <label class="label" for="order-status">New status</label>
-          <div class="control">
-            <div class="select">
-              <select id="order-status" name="status">
-                <option value="">Choose status</option>
-                <option value="Pending">Pending</option>
-                <option value="Confirmed">Confirmed</option>
-                <option value="Fulfilled">Fulfilled</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
+    @if (order()) {
+      <section class="modal-card-body">
+        <div class="box">
+          <dl class="columns is-multiline">
+            <div class="column is-half">
+              <dt class="has-text-weight-semibold">Reference</dt>
+              <dd>&mdash;</dd>
             </div>
+            <div class="column is-half">
+              <dt class="has-text-weight-semibold">Status</dt>
+              <dd>&mdash;</dd>
+            </div>
+            <div class="column is-half">
+              <dt class="has-text-weight-semibold">Customer</dt>
+              <dd>&mdash;</dd>
+            </div>
+            <div class="column is-half">
+              <dt class="has-text-weight-semibold">Email</dt>
+              <dd>&mdash;</dd>
+            </div>
+            <div class="column is-half">
+              <dt class="has-text-weight-semibold">Created</dt>
+              <dd>&mdash;</dd>
+            </div>
+            <div class="column is-half">
+              <dt class="has-text-weight-semibold">Currency</dt>
+              <dd>&mdash;</dd>
+            </div>
+          </dl>
+
+          <div class="table-container">
+            <table class="table is-fullwidth">
+              <thead>
+                <tr>
+                  <th scope="col">SKU</th>
+                  <th scope="col">Item</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col" class="has-text-right">Unit price</th>
+                  <th scope="col" class="has-text-right">Line total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (lineItem of order()!.lines; track lineItem.sku) {
+                  <tr>
+                    <td>{{lineItem.sku}}</td>
+                    <td>{{lineItem.name}}</td>
+                    <td>{{lineItem.quantity}}</td>
+                    <td class="has-text-right">{{lineItem.unitPrice}}</td>
+                    <td class="has-text-right">{{lineItem.lineTotal}}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
+          <dl class="has-text-right">
+            <dt class="has-text-weight-semibold">Subtotal</dt>
+            <dd class="mb-2">{{currencyPrefix()}}{{order()!.subTotal.toFixed(2)}}</dd>
+            <dt class="has-text-weight-semibold">Tax</dt>
+            <dd class="mb-2">{{currencyPrefix()}}{{order()!.tax.toFixed(2)}}</dd>
+            <dt class="has-text-weight-semibold">Total</dt>
+            <dd>{{currencyPrefix()}}{{order()!.total.toFixed(2)}}</dd>
+          </dl>
         </div>
-        <button class="button is-primary" type="button">Change status</button>
-      </div>
-    </section>
+      </section>
+    }
+
+    @if (error()) {
+      <section class="modal-card-body">
+        <span class="has-text-danger">
+          Failed to load order details: {{id()}}
+        </span>
+      </section>
+    }
+
     <footer class="modal-card-foot">
       <button class="button" type="button">Close</button>
     </footer>
