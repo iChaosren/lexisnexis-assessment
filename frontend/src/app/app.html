@@ -1,5 +1,11 @@
-<nav>
-  <a routerLink="/orders">Orders</a>
-  <a routerLink="/orders/new">New order</a>
+<nav class="section py-4" aria-label="Main navigation">
+  <div class="container buttons">
+    <a class="button is-light" routerLink="/orders">Orders</a>
+    <a class="button is-primary" routerLink="/orders/new">New order</a>
+  </div>
 </nav>
-<router-outlet />
+<main class="section pt-0">
+  <div class="container">
+    <router-outlet />
+  </div>
+</main>

@@ -9,7 +9,10 @@ builder.Services.AddSingleton<IOrderDb, OrderDb>();
 var app = builder.Build();
 
 app.UseRouting();
+app.UseAuthorization();
+
 app.MapHealthChecks("/api/health");
+app.MapControllers();
 
 app.Run();
 

@@ -14,7 +14,7 @@ public class OrderControllerTests
     [Theory]
     [InlineData(0)]
     [InlineData(10)]
-    public void CreateOrder_returns_one_for_a_new_reference_including_a_zero_price(int unitPrice)
+    public void CreatesNewOrder(int unitPrice)
     {
         var controller = new OrderController(new OrderDb());
         var request = NewOrder(unitPrice: unitPrice);
@@ -25,7 +25,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void CreateOrder_returns_zero_for_a_repeated_reference()
+    public void SkipsRepeatedReference()
     {
         var controller = new OrderController(new OrderDb());
         var request = NewOrder();
@@ -38,7 +38,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void CreateOrder_does_not_duplicate_an_existing_seed_reference()
+    public void SkipsExistingReference()
     {
         var controller = new OrderController(new OrderDb());
         var request = NewOrder(reference: "TEST-ORDER-001");
@@ -49,7 +49,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void ListOrders_returns_orders_newest_first()
+    public void ListsNewestFirst()
     {
         var controller = new OrderController(new OrderDb());
 
@@ -61,7 +61,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void GetOrder_returns_customer_lines_and_server_totals()
+    public void ReturnsOrderDetails()
     {
         var controller = new OrderController(new OrderDb());
 
@@ -87,7 +87,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void GetOrder_returns_a_null_value_for_an_unknown_id()
+    public void ReturnsNullForMissingOrder()
     {
         var controller = new OrderController(new OrderDb());
 
@@ -97,7 +97,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void GetOrder_can_read_a_newly_created_order_with_server_totals()
+    public void ReturnsCreatedOrder()
     {
         var controller = new OrderController(new OrderDb());
         var request = NewOrder();
@@ -114,7 +114,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void ListOrders_contains_one_order_after_a_repeated_submission()
+    public void ListsRepeatedOrderOnce()
     {
         var controller = new OrderController(new OrderDb());
         var request = NewOrder();
@@ -123,28 +123,29 @@ public class OrderControllerTests
 
         var result = controller.ListOrders();
 
-        var created = Assert.Single(OkValue(result), order => order.ExternalReference == request.ExternalReference);
-        Assert.Equal(request.ExternalReference, created.ExternalReference);
+        Assert.Single(OkValue(result), order => order.ExternalReference == request.ExternalReference);
     }
 
     [Fact]
-    public void ChangeOrderStatus_updates_status_and_update_time()
+    public void UpdatesStatus()
     {
         var controller = new OrderController(new OrderDb());
         var before = OkValue(controller.GetOrder(PendingOrderId));
         var request = StatusChange(PendingOrderId, OrderStatus.Confirmed);
+        var earliestUpdate = DateTime.UtcNow;
 
         var result = controller.ChangeOrderStatus(PendingOrderId, request);
+        var latestUpdate = DateTime.UtcNow;
 
         var after = OkValue(controller.GetOrder(PendingOrderId));
         Assert.Equal(1, OkValue(result));
         Assert.Equal(OrderStatus.Confirmed, after.Status);
         Assert.Equal(before.CreatedAt, after.CreatedAt);
-        Assert.True(after.UpdatedAt > before.UpdatedAt);
+        Assert.InRange(after.UpdatedAt, earliestUpdate, latestUpdate);
     }
 
     [Fact]
-    public void ChangeOrderStatus_returns_zero_without_changing_an_identical_status()
+    public void SkipsUnchangedStatus()
     {
         var controller = new OrderController(new OrderDb());
         var before = OkValue(controller.GetOrder(PendingOrderId));
@@ -159,7 +160,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void ChangeOrderStatus_returns_zero_for_an_unknown_order()
+    public void ReturnsZeroForMissingOrder()
     {
         var controller = new OrderController(new OrderDb());
         var request = StatusChange(UnknownOrderId, OrderStatus.Confirmed);
@@ -170,7 +171,7 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void ChangeOrderStatus_rejects_returning_a_confirmed_order_to_pending()
+    public void RejectsReturnToPending()
     {
         var controller = new OrderController(new OrderDb());
         var request = StatusChange(ConfirmedOrderId, OrderStatus.Pending);
@@ -183,7 +184,7 @@ public class OrderControllerTests
     [Theory]
     [InlineData(OrderStatus.Fulfilled)]
     [InlineData(OrderStatus.Cancelled)]
-    public void ChangeOrderStatus_rejects_changes_from_a_terminal_order(OrderStatus terminalStatus)
+    public void RejectsTerminalChanges(OrderStatus terminalStatus)
     {
         var controller = new OrderController(new OrderDb());
         Assert.Equal(1, OkValue(controller.ChangeOrderStatus(
