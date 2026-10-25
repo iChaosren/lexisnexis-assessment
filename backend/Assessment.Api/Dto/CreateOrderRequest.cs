@@ -3,7 +3,7 @@ namespace Assessment.Api.Dto;
 // Assessment excerpt: “You design the API, data model, validation, and error behavior.”
 public sealed class CreateOrderRequest
 {
-    public string ExternalReference { get; set; } = null!;
+    public required string ExternalReference { get; set; }
 
     public Currency Currency { get; set; }
 

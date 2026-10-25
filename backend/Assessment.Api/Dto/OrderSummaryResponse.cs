@@ -4,7 +4,7 @@ public sealed class OrderSummaryResponse
 {
     public Guid Id { get; set; }
 
-    public string ExternalReference { get; set; } = null!;
+    public required string ExternalReference { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

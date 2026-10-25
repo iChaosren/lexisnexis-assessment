@@ -16,7 +16,6 @@ public sealed class Order : IMapToDto<OrderResponse>
         this.UpdatedAt = DateTime.UtcNow;
         this.Currency = dto.Currency;
         this.Lines = dto.Lines.Select((l) => new LineItem(l)).ToList();
-        // Fill out any missing entries here
     }
     
     public Guid Id { get; set; }

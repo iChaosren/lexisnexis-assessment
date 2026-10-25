@@ -7,9 +7,9 @@ public sealed class OrderLineResponse
 
     public string Name { get; set; } = null!;
 
-    public int Quantity;
+    public int Quantity { get; set; }
 
-    public decimal UnitPrice;
+    public decimal UnitPrice { get; set; }
 
     public decimal LineTotal { get; set; }
 }

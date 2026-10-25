@@ -4,11 +4,11 @@ public sealed class OrderResponse
 {
     public Guid Id { get; set; }
 
-    public string ExternalReference { get; set; } = null!;
+    public required string ExternalReference { get; set; }
 
     public Guid CustomerId { get; set; }
 
-    public CustomerResponse Customer { get; set; } = null!;
+    public required CustomerResponse Customer { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

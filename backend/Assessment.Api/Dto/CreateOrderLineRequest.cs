@@ -1,13 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Assessment.Api.Dto;
 
 // Assessment excerpt: “Quantities are positive whole numbers; prices are non-negative.”
 public sealed class CreateOrderLineRequest
 {
-    public string SKU { get; set; } = null!;
+    public required string SKU { get; set; }
 
-    public string Name { get; set; } = null!;
+    public required string Name { get; set; }
 
-    public int Quantity;
+    [Range(1, int.MaxValue)]
+    public int Quantity { get; set; }
 
-    public decimal UnitPrice;
+    [Range(typeof(decimal), "0", DecimalExtensions.MaxValue)]
+    public decimal UnitPrice { get; set; }
 }

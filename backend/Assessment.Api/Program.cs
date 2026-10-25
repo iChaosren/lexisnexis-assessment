@@ -9,13 +9,7 @@ builder.Services.AddSingleton<IOrderDb, OrderDb>();
 var app = builder.Build();
 
 app.UseRouting();
-app.UseAuthorization();
-
 app.MapHealthChecks("/api/health");
-app.MapControllerRoute(
-    name: "api",
-    pattern: "api/{controller=Order}/{action=Index}/{id?}")
-    .WithStaticAssets();
 
 app.Run();
 
