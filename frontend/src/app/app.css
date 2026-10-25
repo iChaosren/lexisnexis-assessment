@@ -1,0 +1,7 @@
+:host { display: block; }
+main { max-width: 42rem; margin: 6rem auto; padding: 0 1.5rem; }
+.eyebrow { color: #4056a1; font-weight: 600; }
+h1 { font-size: 2.5rem; margin: 0.75rem 0; }
+button { margin-top: 1rem; padding: 0.75rem 1rem; border: 0; border-radius: 0.375rem; background: #243b80; color: white; font: inherit; cursor: pointer; }
+button:hover { background: #18295d; }
+button:focus-visible { outline: 3px solid #6584e8; outline-offset: 3px; }

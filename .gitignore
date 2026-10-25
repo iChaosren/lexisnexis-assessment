@@ -1,0 +1,24 @@
+# Generated output
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.angular/
+**/coverage/
+**/TestResults/
+
+# Local settings and credentials
+.vs/
+.idea/
+*.user
+*.suo
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+
+# Local logs and OS files
+*.log
+.DS_Store
+Thumbs.db
