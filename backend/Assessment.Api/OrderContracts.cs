@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Assessment.Api;
 
 // Provisional scaffold contracts chosen with AI assistance. Revise these as you design the API.
@@ -10,7 +12,7 @@ public record CreateOrderRequest(
 // TODO: Implement the validation yourself; these types do not enforce the business rules.
 public record CreateOrderLineRequest(string Description, int Quantity, decimal UnitPrice);
 
-public record ChangeOrderStatusRequest(string Status);
+public record ChangeOrderStatusRequest(Guid OrderId, OrderStatus NewStatus);
 
 public record OrderSummaryResponse(
     Guid Id,
