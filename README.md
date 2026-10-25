@@ -116,4 +116,4 @@ Both return `Healthy`. Calls to the order stubs should currently receive 501, wh
 
 Implement the business behavior, backend validation and business tests yourself. Decide storage, duplicate/reference semantics, totals/rounding, statuses/transitions, final HTTP errors, and completed UI behavior. `SOLUTION.md` remains an unfilled template for your actual decisions. Continue `AI_ASSISTANCE.md` with later prompts and your review. Final delivery still needs the completed repository and narrated 5–10 minute video.
 
-This repository is local. No remote, publication, sharing or submission has been performed.
+This task made local changes only. No remote was created and nothing was pushed, published, shared or submitted by the assistant. Any existing Git remote configuration is preserved.
