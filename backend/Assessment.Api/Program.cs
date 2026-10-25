@@ -1,9 +1,12 @@
+using Assessment.Api;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
 app.MapHealthChecks("/api/health");
+app.MapOrdersEndpoints();
 
 app.Run();
 

@@ -1,0 +1,12 @@
+# This file configures the single frontend package; it is not a monorepo layer.
+overrides:
+  # Angular 21 build tooling pins an older Undici; keep the verified security fix.
+  undici: 7.30.1
+
+# Angular's build/cache/watch dependencies select/check native platform binaries.
+# Named entries keep pnpm's clean install noninteractive without allowing all scripts.
+allowBuilds:
+  esbuild: true
+  '@parcel/watcher': true
+  lmdb: true
+  msgpackr-extract: true

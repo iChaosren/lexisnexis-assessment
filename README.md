@@ -1,39 +1,34 @@
-# LexisNexis assessment scaffold
+# LexisNexis assessment learning scaffold
 
-Setup only for Clayton's Order Intake & Tracking assessment. The application currently has an Angular starter page and one ASP.NET Core health endpoint. All assessment features and business tests are still to be implemented by Clayton.
+Open **`backend\LexisNexis.Assessment.sln`** for the backend. It contains the API and its test project. The first scaffold used a root `.slnx` because .NET 10's template defaults to that newer solution format. It has now been replaced by one conventional `.sln` inside `backend`; the old file remains recoverable in Git commit `b58bb19`. There are no competing solution files to maintain.
 
-## Prerequisites
+This remains boilerplate for Clayton's Order Intake & Tracking assessment. Four backend endpoint stubs and three Angular pages are connected, with comments quoting the supplied assessment excerpts next to the relevant extension points. **Every order endpoint returns HTTP 501 Not Implemented.** No order is saved and no business rules have been implemented.
 
-Verified on Clayton-PC on 2026-10-25:
+## Installed toolchain
 
-| Tool | Version |
+| Tool | Version used |
 | --- | --- |
-| .NET SDK | 10.0.401 (LTS; pinned in `global.json`) |
-| ASP.NET Core runtime | 10.0.12 |
-| Node.js | 22.20.0 |
-| npm | 10.9.3 |
-| Angular framework | 21.2.25 |
-| Angular CLI / build tools | 21.2.28 (project-local) |
-| TypeScript | 5.9.3 |
-| RxJS | 7.8.2 |
+| .NET SDK / ASP.NET Core runtime | 10.0.401 / 10.0.12 |
+| Node.js / pnpm | 22.20.0 / 12.14.0 |
+| Angular framework, forms, router | 21.2.25 |
+| Angular CLI / build | 21.2.28 (project-local) |
+| TypeScript / RxJS | 5.9.3 / 7.8.2 |
 
-Angular 21 supports Node `^20.19.0 || ^22.12.0 || ^24.0.0` and TypeScript `>=5.9.0 <6.0.0`. These versions meet the assessment's Angular 18+, TypeScript 5+, and .NET 8+ requirements. No global Angular CLI install is needed. See [Angular compatibility](https://angular.dev/reference/versions) and [Microsoft's .NET 10 overview](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/overview).
-
-The package override pins Angular's transitive build dependency `undici` to patched version 7.30.1; Angular build 21.2.28 otherwise pins 7.29.1. Revisit this override when upgrading Angular's build tools. See the [upstream security advisory](https://github.com/nodejs/undici/security/advisories/GHSA-xjj6-f33q-929c).
+Angular 21 supports the installed Node and TypeScript versions. No global CLI, SDK, or package-manager change is needed. See [Angular compatibility](https://angular.dev/reference/versions) and [.NET 10](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/overview).
 
 ## Install
 
-Run these commands in Windows PowerShell. `npm.cmd` avoids PowerShell execution-policy issues with `npm.ps1`.
+Run in Windows PowerShell. The `.cmd` commands avoid PowerShell execution-policy issues with script wrappers.
 
 ```powershell
 Set-Location C:\Github\lexisnexis-assessment
-dotnet restore .\LexisNexis.Assessment.slnx --locked-mode
-npm.cmd --prefix .\frontend ci
+dotnet restore .\backend\LexisNexis.Assessment.sln --locked-mode
+pnpm.cmd --dir .\frontend install --frozen-lockfile
 ```
 
-The .NET solution contains the API and its test project. The Angular project lives in `frontend` and has its own package lock. Package restore requires internet access on the first run.
+`frontend/pnpm-lock.yaml` is the active frontend lockfile. It was imported from the original npm lock; that original is recoverable in `b58bb19`, rather than kept as a second active lock. Package metadata and Angular's CLI configuration now select pnpm. `frontend/pnpm-workspace.yaml` holds pnpm 12's local settings for this single frontend package: the existing patched Undici override, and named native build/cache/watch dependencies permitted to run install scripts. This does not introduce a multi-project architecture or change global settings.
 
-## Run locally
+## Run
 
 Terminal 1, from the repository root:
 
@@ -44,56 +39,81 @@ dotnet run --project .\backend\Assessment.Api
 Terminal 2, from the repository root:
 
 ```powershell
-npm.cmd --prefix .\frontend start
+pnpm.cmd --dir .\frontend start
 ```
 
-Open <http://localhost:4200> and click **Check API health**. With both servers running, the page should display `Healthy`. The API listens at <http://localhost:5080/api/health>. These are local HTTP development servers; no certificate trust setup is required.
+Open <http://localhost:4200>. The shell's **Check API health** button should display `Healthy`. The API health URL is <http://localhost:5080/api/health>. Both servers use local HTTP; no certificate trust step is needed. Stop each terminal with **Ctrl+C**.
 
-Angular's development proxy forwards `/api/**` to port 5080. It is configured in `frontend/src/proxy.conf.json` and referenced by `frontend/angular.json`. A production deployment will need its own routing configuration. See [Angular proxy documentation](https://angular.dev/tools/cli/serve#proxying-to-a-backend-server).
+| Angular route | Learning stub |
+| --- | --- |
+| `/orders` | Calls the list endpoint and displays the expected 501 TODO feedback; has a reload button and an eventual response template. |
+| `/orders/new` | Local FormBuilder form, one input line, add-line example, per-field errors, and submit request wiring. |
+| `/orders/:id` | Loads the route ID, calls detail, and includes optional free-text change-status request wiring. |
 
-Optional PowerShell smoke check while both terminals are running:
+The list page links to an explicitly labelled placeholder GUID so the detail stub can be explored before any orders exist. It is not a saved order. There are no sample success responses, invented statuses, or calculated totals.
+
+Angular's dev proxy forwards `/api/**` to `localhost:5080`, using `frontend/src/proxy.conf.json`. A production deployment will need its own routing. See [Angular proxy configuration](https://angular.dev/tools/cli/serve#proxying-to-a-backend-server).
+
+## Backend extension points and provisional contracts
+
+Start in `backend/Assessment.Api/OrdersEndpoints.cs`; `Program.cs` calls `MapOrdersEndpoints()`. Each handler contains its own explicit TODO and 501 ProblemDetails response. Change those methods as you implement, rather than adding layers just to fill in the scaffold.
+
+| Method and path | Handler | Request / intended response shape |
+| --- | --- | --- |
+| `POST /api/orders` | `CreateOrder` | `CreateOrderRequest` / `OrderResponse` |
+| `GET /api/orders` | `ListOrders` | no body / `OrderSummaryResponse[]` |
+| `GET /api/orders/{id:guid}` | `GetOrder` | GUID route ID / `OrderResponse` |
+| `PATCH /api/orders/{id:guid}/status` | `ChangeOrderStatus` | `ChangeOrderStatusRequest` / `OrderResponse` |
+
+`OrderContracts.cs` and `frontend/src/app/order-contracts.ts` contain corresponding shapes. **The route conventions, field names, GUID identifiers, UTC timestamp field, required UI reference/description examples, and plain-string status are scaffold choices made with AI assistance, not mandated assessment details.** Revise them as you design. Requests carry `clientReference` and lines (`description`, `quantity`, `unitPrice`), or a `status` string. The future response shapes include server totals; no calculation or successful response is currently supplied. Decimal handling/rounding and final error behavior remain your decisions.
+
+ASP.NET's ordinary route/JSON binding can reject malformed IDs or JSON before a stub runs. No custom backend quantity/price validation, duplicate handling, sorting, persistence, totals, status vocabulary, or transition policy has been added.
+
+## Angular learning map
+
+| React / application concept | Actual file |
+| --- | --- |
+| Application entry point | `frontend/src/main.ts` bootstraps the standalone `App` class. |
+| App shell / JSX equivalent | `frontend/src/app/app.ts` with `app.html` and `app.css`; its template contains navigation and RouterOutlet. |
+| Route definitions | `frontend/src/app/app.routes.ts`; literal `new` precedes the `:id` route. |
+| App providers / dependency configuration | `frontend/src/app/app.config.ts`. |
+| Shared HTTP client wrapper | `frontend/src/app/api.service.ts`, root-provided and injecting HttpClient. |
+| Request/response types | `frontend/src/app/order-contracts.ts`; backend counterpart `OrderContracts.cs`. |
+| List page | `frontend/src/app/orders/order-list.ts` and `.html`. |
+| Form page and field errors | `frontend/src/app/orders/order-create.ts` and `.html`. |
+| Detail and optional status form | `frontend/src/app/orders/order-detail.ts` and `.html`. |
+| Shared API error display wording | `frontend/src/app/api-error.ts`. |
+| Global styles / build configuration | `frontend/src/styles.css` / `frontend/angular.json`. |
+
+Read **[frontend/LEARNING.md](frontend/LEARNING.md)** for the concrete DI, FormBuilder, template-import and HTTP walkthrough. FormBuilder can be injected into each form component; each component creates and owns its own FormGroup. A root ApiService shares request methods, not form state. `inject(ApiService)` obtains a DI-managed instance; importing its TypeScript class or adding template imports does something different. Constructor injection and inline templates are valid alternatives; field injection and separate templates are used consistently here.
+
+The frontend Validators are requested UX examples. Per-field errors live on each control and are shown by that field's template after touched/dirty or submission. They do not replace the backend validation you still need to implement.
+
+## Build and test
+
+From the repository root after install:
+
+```powershell
+dotnet build .\backend\LexisNexis.Assessment.sln --no-restore --configuration Release
+dotnet test .\backend\LexisNexis.Assessment.sln --no-build --configuration Release --list-tests
+dotnet test .\backend\LexisNexis.Assessment.sln --no-build --configuration Release
+pnpm.cmd --dir .\frontend run build
+pnpm.cmd --dir .\frontend audit
+```
+
+The backend suite has five infrastructure cases: one health test and four endpoint wiring cases asserting operation-specific 501 ProblemDetails. **They are not business unit coverage.** The TODO comment points to the brief's requirement to test the critical business rules you eventually implement. There are no empty or pretend-passing business tests and no frontend unit-test suite. Browser smoke checks performed during setup are recorded separately in `VERIFICATION.md`.
+
+Quick health/proxy check while running both servers:
 
 ```powershell
 Invoke-RestMethod http://localhost:5080/api/health
 Invoke-RestMethod http://localhost:4200/api/health
 ```
 
-Both should return `Healthy`. Stop each server with **Ctrl+C** in its terminal.
+Both return `Healthy`. Calls to the order stubs should currently receive 501, which is intentional.
 
-## Build and test
+## Remaining assessment work
 
-From the repository root, after install:
+Implement the business behavior, backend validation and business tests yourself. Decide storage, duplicate/reference semantics, totals/rounding, statuses/transitions, final HTTP errors, and completed UI behavior. `SOLUTION.md` remains an unfilled template for your actual decisions. Continue `AI_ASSISTANCE.md` with later prompts and your review. Final delivery still needs the completed repository and narrated 5–10 minute video.
 
-```powershell
-dotnet build .\LexisNexis.Assessment.slnx --no-restore --configuration Release
-dotnet test .\LexisNexis.Assessment.slnx --no-build --configuration Release --list-tests
-dotnet test .\LexisNexis.Assessment.slnx --no-build --configuration Release
-npm.cmd --prefix .\frontend run build
-```
-
-There is **one infrastructure integration smoke test** in `backend/Assessment.Api.Tests/HealthEndpointTests.cs`. It hosts the real API pipeline in memory and checks that `/api/health` returns HTTP 200 and `Healthy`. It is not business unit coverage. No empty tests or frontend test suite are included. Clayton still needs to add the assessment's backend unit tests as he implements the behavior.
-
-## A short React-to-Angular file map
-
-| React concept | This scaffold |
-| --- | --- |
-| `createRoot(...)` entry point | `frontend/src/main.ts` bootstraps the standalone `App` component. |
-| `App.tsx` component logic | `frontend/src/app/app.ts`; `@Component` connects the class, template, and CSS. Standalone is Angular's default; there is no `AppModule`. |
-| JSX markup | `frontend/src/app/app.html`; `{{ health() }}` displays a signal, and `(click)="checkHealth()"` binds an event. |
-| Component state | `signal(...)` in `app.ts`; read with `health()` and update with `health.set(...)`. |
-| Context/providers | `frontend/src/app/app.config.ts`; `provideHttpClient()` makes Angular's HTTP service injectable. |
-| A request using `fetch` | `inject(HttpClient)` and `http.get(...)` in `app.ts`; this small one-response request uses an Observable subscription. |
-| Component/global CSS | `frontend/src/app/app.css` / `frontend/src/styles.css`. |
-| Vite config and dev proxy | `frontend/angular.json` / `frontend/src/proxy.conf.json`. |
-| `package.json` scripts | `frontend/package.json`; `npm.cmd start` uses the local Angular CLI. |
-
-The health example demonstrates only component state, event binding, dependency injection, and a local API call. Routing, forms, storage, orders, validation, duplicate handling, totals, and status flows have not been implemented.
-
-## Assessment handoff
-
-- `SOLUTION.md` is an unfilled decision template for Clayton to complete in his own words.
-- `AI_ASSISTANCE.md` records the scaffold assistance and prompts honestly; continue the log if using more AI assistance.
-- `VERIFICATION.md` records actual setup checks and their limits.
-- Final delivery still needs the completed GitHub repository, README, solution decisions/tradeoffs, and a narrated 5–10 minute video.
-
-This is a local Git repository. No remote destination has been chosen or created, and nothing has been published or submitted.
+This repository is local. No remote, publication, sharing or submission has been performed.

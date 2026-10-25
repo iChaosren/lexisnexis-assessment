@@ -1,0 +1,50 @@
+<!-- Assessment excerpt: “Provides a simple way to submit a new order.” -->
+<h2>New order stub</h2>
+<p class="notice">Frontend validation examples are active. Server validation, saving, duplicate handling, and totals remain TODO.</p>
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <label for="client-reference">Client reference</label>
+  <input id="client-reference" formControlName="clientReference" aria-describedby="reference-error" />
+  <!-- Validators attach errors to this control; touched/dirty decide when to display them. -->
+  @if (form.controls.clientReference.touched || form.controls.clientReference.dirty) {
+    @if (form.controls.clientReference.hasError('required')) {
+      <p id="reference-error" class="field-error">Enter a client reference (example required-field message).</p>
+    }
+  }
+
+  <div formArrayName="lines">
+    @for (line of form.controls.lines.controls; track line; let i = $index) {
+      <fieldset [formGroupName]="i">
+        <legend>Line {{ i + 1 }}</legend>
+        <label [for]="'description-' + i">Description</label>
+        <input [id]="'description-' + i" formControlName="description" [attr.aria-describedby]="'description-error-' + i" />
+        @if ((line.controls.description.touched || line.controls.description.dirty) && line.controls.description.hasError('required')) {
+          <p [id]="'description-error-' + i" class="field-error">Enter a description (example required-field message).</p>
+        }
+
+        <!-- Assessment excerpt: “Quantities are positive whole numbers; prices are non-negative.” -->
+        <label [for]="'quantity-' + i">Quantity</label>
+        <input [id]="'quantity-' + i" type="number" step="1" formControlName="quantity" [attr.aria-describedby]="'quantity-error-' + i" />
+        @if (line.controls.quantity.touched || line.controls.quantity.dirty) {
+          @if (line.controls.quantity.hasError('required')) {
+            <p [id]="'quantity-error-' + i" class="field-error">Enter a quantity.</p>
+          } @else if (line.controls.quantity.hasError('min') || line.controls.quantity.hasError('pattern')) {
+            <p [id]="'quantity-error-' + i" class="field-error">Use a positive whole number (frontend example).</p>
+          }
+        }
+
+        <label [for]="'price-' + i">Unit price</label>
+        <input [id]="'price-' + i" type="number" step="any" formControlName="unitPrice" [attr.aria-describedby]="'price-error-' + i" />
+        @if (line.controls.unitPrice.touched || line.controls.unitPrice.dirty) {
+          @if (line.controls.unitPrice.hasError('required')) {
+            <p [id]="'price-error-' + i" class="field-error">Enter a unit price.</p>
+          } @else if (line.controls.unitPrice.hasError('min')) {
+            <p [id]="'price-error-' + i" class="field-error">Use a non-negative price (frontend example).</p>
+          }
+        }
+      </fieldset>
+    }
+  </div>
+  <button type="button" (click)="addLine()" [disabled]="submitting()">Add an input line</button>
+  <button type="submit" [disabled]="submitting()">Call submit stub</button>
+</form>
+<p role="status">{{ message() }}</p>

@@ -1,7 +1,14 @@
-<main>
+<header>
   <p class="eyebrow">LexisNexis assessment</p>
-  <h1>Scaffold ready</h1>
-  <p>Angular and ASP.NET Core are wired up. This is your starting point.</p>
+  <h1>Order workspace — learning scaffold</h1>
+  <p>Pages and API calls are wired. Order behavior is intentionally not implemented.</p>
+  <nav aria-label="Main navigation">
+    <a routerLink="/orders" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Order list</a>
+    <a routerLink="/orders/new" routerLinkActive="active">New order</a>
+  </nav>
   <button type="button" (click)="checkHealth()">Check API health</button>
   <p role="status">{{ health() }}</p>
+</header>
+<main>
+  <router-outlet />
 </main>
