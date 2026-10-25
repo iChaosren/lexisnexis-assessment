@@ -1,1 +1,43 @@
-<h2>Orders</h2>
+<h2 class="title is-3">Orders</h2>
+
+<div class="box">
+  <div class="table-container">
+    <table class="table is-fullwidth is-striped">
+      <thead>
+        <tr>
+          <th scope="col">Actions</th>
+          <th scope="col">Reference</th>
+          <th scope="col">Created</th>
+          <th scope="col">Status</th>
+          <th scope="col" class="has-text-right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of orders(); track order.id) {
+          <tr>
+            <td>
+              <button class="button" type="button" (click)="selectedId.set(order.id)">View</button>
+            </td>
+            <td>{{ order.externalReference }}</td>
+            <td>{{ order.createdAt }}</td>
+            <td>
+              <select class="select" (change)="updateStatus(order.id, $event)">
+                @for (status of statusOptions; track status) {
+                  @if (status === order.status) {
+                    <option selected value="{{status}}}">{{status}}</option>
+                  }
+                  @else {
+                    <option value="{{status}}}">{{status}}</option>
+                  }
+                }
+              </select>
+            </td>
+            <td>{{ order.total }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<order-detail [id]="selectedId()" (onClose)="selectedId.set('')" />

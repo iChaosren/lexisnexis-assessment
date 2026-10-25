@@ -1,1 +1,69 @@
-<h2>New order</h2>
+<h2 class="title is-3">New order</h2>
+
+<form class="box">
+  <div class="columns">
+    <div class="column">
+      <div class="field">
+        <label class="label" for="external-reference">Client reference</label>
+        <div class="control">
+          <input class="input" id="external-reference" name="externalReference" type="text">
+        </div>
+      </div>
+    </div>
+    <div class="column is-one-quarter">
+      <div class="field">
+        <label class="label" for="currency">Currency</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select id="currency" name="currency">
+              <option value="">Choose currency</option>
+              <option value="ZAR">ZAR</option>
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <fieldset>
+    <legend class="title is-5">Line item</legend>
+    <div class="columns">
+      <div class="column">
+        <div class="field">
+          <label class="label" for="line-sku">SKU</label>
+          <div class="control">
+            <input class="input" id="line-sku" name="sku" type="text">
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="field">
+          <label class="label" for="line-name">Item name</label>
+          <div class="control">
+            <input class="input" id="line-name" name="itemName" type="text">
+          </div>
+        </div>
+      </div>
+      <div class="column is-one-fifth">
+        <div class="field">
+          <label class="label" for="line-quantity">Quantity</label>
+          <div class="control">
+            <input class="input" id="line-quantity" name="quantity" type="number">
+          </div>
+        </div>
+      </div>
+      <div class="column is-one-fifth">
+        <div class="field">
+          <label class="label" for="line-price">Unit price</label>
+          <div class="control">
+            <input class="input" id="line-price" name="unitPrice" type="number" step="any">
+          </div>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <button class="button is-primary mt-4" type="button">Submit order</button>
+</form>

@@ -1,4 +1,6 @@
+import {OrderStatus} from './order-status';
+
 export interface ChangeOrderStatusRequest {
   orderId: string;
-  newStatus: number;
+  newStatus: OrderStatus;
 }
