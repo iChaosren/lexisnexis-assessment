@@ -1,12 +1,21 @@
-using Assessment.Api;
-
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.IncludeFields = true);
 builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<IOrderDb, OrderDb>();
 
 var app = builder.Build();
 
+app.UseRouting();
+app.UseAuthorization();
+
 app.MapHealthChecks("/api/health");
-app.MapOrdersEndpoints();
+app.MapControllerRoute(
+    name: "api",
+    pattern: "api/{controller=Order}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.Run();
 

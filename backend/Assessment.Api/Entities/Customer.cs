@@ -1,3 +1,4 @@
+using Assessment.Api.Dto;
 
 public sealed class Customer : IMapToDto<CustomerResponse>
 {
@@ -11,7 +12,9 @@ public sealed class Customer : IMapToDto<CustomerResponse>
     {
         return new CustomerResponse()
         {
-            // fill me out
+            Id = this.Id,
+            Name = this.Name,
+            Email = this.Email
         };
     }
 }

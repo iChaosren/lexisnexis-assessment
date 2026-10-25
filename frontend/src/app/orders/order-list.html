@@ -10,8 +10,8 @@
     <tbody>
       @for (order of items; track order.id) {
         <tr>
-          <td><a [routerLink]="['/orders', order.id]">{{ order.clientReference }}</a></td>
-          <td>{{ order.createdAtUtc }}</td>
+          <td><a [routerLink]="['/orders', order.id]">{{ order.externalReference }}</a></td>
+          <td>{{ order.createdAt }}</td>
           <td>{{ order.status }}</td>
           <td>{{ order.total }}</td>
         </tr>

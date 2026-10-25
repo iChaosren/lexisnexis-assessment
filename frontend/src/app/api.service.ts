@@ -1,7 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ChangeOrderStatusRequest, CreateOrderRequest, OrderResponse, OrderSummaryResponse } from './order-contracts';
+import { ChangeOrderStatusRequest } from './dtos/change-order-status-request';
+import { CreateOrderRequest } from './dtos/create-order-request';
+import { OrderResponse } from './dtos/order-response';
+import { OrderSummaryResponse } from './dtos/order-summary-response';
 
 // Registers one shared service at the root injector. It does not hold form state.
 @Injectable({ providedIn: 'root' })

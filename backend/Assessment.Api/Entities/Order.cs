@@ -1,6 +1,6 @@
 
 using System.ComponentModel;
-using Assessment.Api;
+using Assessment.Api.Dto;
 
 public sealed class Order : IMapToDto<OrderResponse>
 {
@@ -62,7 +62,17 @@ public sealed class Order : IMapToDto<OrderResponse>
         return new OrderResponse()
         {
             Id = this.Id,
-            // etc. fill me out
+            ExternalReference = this.ExternalReference,
+            CustomerId = this.CustomerId,
+            Customer = this.Customer.ToDto(),
+            CreatedAt = this.CreatedAt,
+            UpdatedAt = this.UpdatedAt,
+            Status = this.Status,
+            Currency = this.Currency,
+            Lines = this.Lines.Select(line => line.ToDto()).ToList(),
+            SubTotal = this.SubTotal,
+            Tax = this.Tax,
+            Total = this.Total
         };
     }
 }

@@ -1,4 +1,4 @@
-using Assessment.Api;
+using Assessment.Api.Dto;
 
 public interface IOrderDb
 {

@@ -1,6 +1,6 @@
 
 using System.ComponentModel.DataAnnotations;
-using Assessment.Api;
+using Assessment.Api.Dto;
 
 public sealed class LineItem : IMapToDto<OrderLineResponse>
 {
@@ -32,7 +32,11 @@ public sealed class LineItem : IMapToDto<OrderLineResponse>
     {
         return new OrderLineResponse()
         {
-            // fill me out
+            SKU = this.SKU,
+            Name = this.Name,
+            Quantity = this.Quantity,
+            UnitPrice = this.UnitPrice,
+            LineTotal = this.LineTotal
         };
     }
 }

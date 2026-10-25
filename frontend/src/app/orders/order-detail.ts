@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EMPTY, catchError, switchMap } from 'rxjs';
 import { apiErrorMessage } from '../api-error';
 import { ApiService } from '../api.service';
-import { OrderResponse } from '../order-contracts';
+import { OrderResponse } from '../dtos/order-response';
 
 // Assessment excerpt: “Shows enough detail for a user to verify that totals and status look correct.”
 @Component({

@@ -3,6 +3,8 @@
 **/obj/
 **/node_modules/
 **/dist/
+!backend/Assessment.Api/wwwroot/lib/**/dist/
+!backend/Assessment.Api/wwwroot/lib/**/dist/**
 **/.angular/
 **/coverage/
 **/TestResults/

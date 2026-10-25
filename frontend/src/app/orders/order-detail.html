@@ -4,8 +4,8 @@
 <p role="status">{{ message() }}</p>
 @if (order(); as currentOrder) {
   <dl>
-    <dt>Client reference</dt><dd>{{ currentOrder.clientReference }}</dd>
-    <dt>Created (UTC)</dt><dd>{{ currentOrder.createdAtUtc }}</dd>
+    <dt>Client reference</dt><dd>{{ currentOrder.externalReference }}</dd>
+    <dt>Created (UTC)</dt><dd>{{ currentOrder.createdAt }}</dd>
     <dt>Status</dt><dd>{{ currentOrder.status }}</dd>
     <dt>Overall total from server</dt><dd>{{ currentOrder.total }}</dd>
   </dl>
@@ -15,7 +15,7 @@
     <thead><tr><th>Description</th><th>Quantity</th><th>Unit price</th><th>Line total from server</th></tr></thead>
     <tbody>
       @for (line of currentOrder.lines; track $index) {
-        <tr><td>{{ line.description }}</td><td>{{ line.quantity }}</td><td>{{ line.unitPrice }}</td><td>{{ line.lineTotal }}</td></tr>
+        <tr><td>{{ line.name }}</td><td>{{ line.quantity }}</td><td>{{ line.unitPrice }}</td><td>{{ line.lineTotal }}</td></tr>
       }
     </tbody>
   </table>

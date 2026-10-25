@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { apiErrorMessage } from '../api-error';
 import { ApiService } from '../api.service';
-import { OrderSummaryResponse } from '../order-contracts';
+import { OrderSummaryResponse } from '../dtos/order-summary-response';
 
 // Assessment excerpt: “Displays a list of orders showing the most recent first.”
 @Component({
