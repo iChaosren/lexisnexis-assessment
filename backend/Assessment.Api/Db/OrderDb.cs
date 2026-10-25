@@ -6,12 +6,12 @@ public sealed class OrderDb : IOrderDb
 {
     private ConcurrentDictionary<Guid, Order> orderList = new()
     {
-        [Guid.Parse("11111111-1111-4111-8111-111111111111")] = new Order()
+        [Guid.Parse("11111111-1111-4111-8111-111111111111")] = new Order
         {
             Id = Guid.Parse("11111111-1111-4111-8111-111111111111"),
             ExternalReference = "TEST-ORDER-001",
             CustomerId = Guid.Parse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-            Customer = new Customer()
+            Customer = new Customer
             {
                 Id = Guid.Parse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 Name = "Test Customer One",
@@ -21,23 +21,23 @@ public sealed class OrderDb : IOrderDb
             UpdatedAt = new DateTime(2026, 10, 25, 12, 0, 0, DateTimeKind.Utc),
             Status = OrderStatus.Pending,
             Currency = Currency.ZAR,
-            Lines = new List<LineItem>()
+            Lines = new List<LineItem>
             {
-                new LineItem(new CreateOrderLineRequest()
+                new()
                 {
                     SKU = "TEST-SKU-001",
                     Name = "Test item one",
                     Quantity = 2,
                     UnitPrice = 10m
-                })
+                }
             }
         },
-        [Guid.Parse("22222222-2222-4222-8222-222222222222")] = new Order()
+        [Guid.Parse("22222222-2222-4222-8222-222222222222")] = new Order
         {
             Id = Guid.Parse("22222222-2222-4222-8222-222222222222"),
             ExternalReference = "TEST-ORDER-002",
             CustomerId = Guid.Parse("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-            Customer = new Customer()
+            Customer = new Customer
             {
                 Id = Guid.Parse("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Test Customer Two",
@@ -47,15 +47,15 @@ public sealed class OrderDb : IOrderDb
             UpdatedAt = new DateTime(2026, 10, 25, 13, 0, 0, DateTimeKind.Utc),
             Status = OrderStatus.Confirmed,
             Currency = Currency.USD,
-            Lines = new List<LineItem>()
+            Lines = new List<LineItem>
             {
-                new LineItem(new CreateOrderLineRequest()
+                new ()
                 {
                     SKU = "TEST-SKU-002",
                     Name = "Test item two",
                     Quantity = 1,
                     UnitPrice = 25m
-                })
+                }
             }
         }
     };

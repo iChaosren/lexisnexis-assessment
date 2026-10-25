@@ -4,6 +4,10 @@ using Assessment.Api.Dto;
 
 public sealed class LineItem : IMapToDto<OrderLineResponse>
 {
+    public LineItem()
+    {
+    }
+    
     public LineItem(CreateOrderLineRequest lineItem)
     {
         this.SKU = lineItem.SKU;

@@ -1,6 +1,0 @@
-:host { display: block; }
-header, main { max-width: 55rem; margin: 2rem auto; padding: 0 1.5rem; }
-.eyebrow { color: #4056a1; font-weight: 600; }
-h1 { font-size: 2rem; margin: 0.75rem 0; }
-nav { display: flex; gap: 1.5rem; margin: 1rem 0; }
-.active { font-weight: 700; }

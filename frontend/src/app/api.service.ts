@@ -1,41 +1,33 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ChangeOrderStatusRequest } from './dtos/change-order-status-request';
 import { CreateOrderRequest } from './dtos/create-order-request';
 import { OrderResponse } from './dtos/order-response';
 import { OrderSummaryResponse } from './dtos/order-summary-response';
 
-// Registers one shared service at the root injector. It does not hold form state.
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  // inject() requests the configured instance; a TypeScript import alone does not do DI.
-  private readonly http = inject(HttpClient);
-  private readonly ordersUrl = '/api/orders';
-
   health(): Observable<string> {
-    return this.http.get('/api/health', { responseType: 'text' });
+    throw new Error('Not implemented.');
   }
 
   // Assessment excerpt: “Provides a simple way to submit a new order.”
-  // TODO: the API currently returns 501. Subscribing sends the request; no order is saved.
   submitOrder(request: CreateOrderRequest): Observable<OrderResponse> {
-    return this.http.post<OrderResponse>(this.ordersUrl, request);
+    throw new Error('Not implemented.');
   }
 
   // Assessment excerpt: “Displays a list of orders showing the most recent first.”
-  // TODO: the server must supply the required ordering; no client sorting is implemented.
   listOrders(): Observable<OrderSummaryResponse[]> {
-    return this.http.get<OrderSummaryResponse[]>(this.ordersUrl);
+    throw new Error('Not implemented.');
   }
 
   // Assessment excerpt: “Shows enough detail for a user to verify that totals and status look correct.”
   getOrder(id: string): Observable<OrderResponse> {
-    return this.http.get<OrderResponse>(`${this.ordersUrl}/${encodeURIComponent(id)}`);
+    throw new Error('Not implemented.');
   }
 
   // Assessment excerpt: “Optional if time permits: allow changing an order’s status from the UI or add simple client-side filtering.”
   changeOrderStatus(id: string, request: ChangeOrderStatusRequest): Observable<OrderResponse> {
-    return this.http.patch<OrderResponse>(`${this.ordersUrl}/${encodeURIComponent(id)}/status`, request);
+    throw new Error('Not implemented.');
   }
 }
