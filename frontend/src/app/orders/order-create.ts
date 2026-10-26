@@ -24,14 +24,7 @@ export class OrderCreate implements OnInit {
     externalReference: ['', Validators.required],
     customerId: ['', Validators.required],
     currency: [Currency.ZAR, [Validators.required, oneOf(Object.values(Currency))]],
-    lines: this.formBuilder.nonNullable.array([
-      this.formBuilder.nonNullable.group({
-        sku: ['', Validators.required],
-        name: ['', Validators.required],
-        quantity: [1, [Validators.required, Validators.min(1)]],
-        unitPrice: [0, [Validators.required, Validators.min(0)]]
-      })
-    ])
+    lines: this.formBuilder.nonNullable.array([this.createLine()])
   });
 
   ngOnInit(): void {
@@ -39,6 +32,10 @@ export class OrderCreate implements OnInit {
       next: customers => this.customers.set(customers),
       error: () => this.submissionMessage.set('Could not load customers.')
     });
+  }
+
+  addLine() {
+    this.form.controls.lines.push(this.createLine());
   }
 
   submit() {
@@ -65,6 +62,15 @@ export class OrderCreate implements OnInit {
         this.submitting.set(false);
         this.submissionMessage.set('Could not submit the order.');
       }
+    });
+  }
+
+  private createLine() {
+    return this.formBuilder.nonNullable.group({
+      sku: ['', Validators.required],
+      name: ['', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      unitPrice: [0, [Validators.required, Validators.min(0)]]
     });
   }
 }

@@ -42,7 +42,7 @@
   </div>
 
   <fieldset formArrayName="lines">
-    <legend class="title is-5">Line item</legend>
+    <legend class="title is-5">Line items</legend>
     @for (line of form.controls.lines.controls; track line; let i = $index) {
       <div class="columns" [formGroupName]="i">
         <div class="column">
@@ -81,6 +81,7 @@
     }
   </fieldset>
 
+  <button class="button is-light mt-4 mr-2" type="button" (click)="addLine()" [disabled]="submitting()">Add line item</button>
   <button class="button is-primary mt-4" type="submit" [disabled]="submitting()">Submit order</button>
   <p class="mt-4" role="status">{{ submissionMessage() }}</p>
 </form>
