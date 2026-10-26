@@ -176,29 +176,31 @@ public class OrderControllerTests
     }
 
     [Fact]
-    public void RejectsReturnToPending()
+    public void ReturnsToPending()
     {
         var controller = new OrderController(new OrderDb());
         var request = StatusChange(ConfirmedOrderId, OrderStatus.Pending);
 
-        Assert.Throws<ArgumentException>(() => controller.ChangeOrderStatus(ConfirmedOrderId, request));
+        var result = controller.ChangeOrderStatus(ConfirmedOrderId, request);
 
-        Assert.Equal(OrderStatus.Confirmed, OkValue(controller.GetOrder(ConfirmedOrderId)).Status);
+        Assert.Equal(1, OkValue(result));
+        Assert.Equal(OrderStatus.Pending, OkValue(controller.GetOrder(ConfirmedOrderId)).Status);
     }
 
     [Theory]
     [InlineData(OrderStatus.Fulfilled)]
     [InlineData(OrderStatus.Cancelled)]
-    public void RejectsTerminalChanges(OrderStatus terminalStatus)
+    public void UpdatesTerminalOrder(OrderStatus terminalStatus)
     {
         var controller = new OrderController(new OrderDb());
         Assert.Equal(1, OkValue(controller.ChangeOrderStatus(
             ConfirmedOrderId, StatusChange(ConfirmedOrderId, terminalStatus))));
         var request = StatusChange(ConfirmedOrderId, OrderStatus.Confirmed);
 
-        Assert.Throws<ArgumentException>(() => controller.ChangeOrderStatus(ConfirmedOrderId, request));
+        var result = controller.ChangeOrderStatus(ConfirmedOrderId, request);
 
-        Assert.Equal(terminalStatus, OkValue(controller.GetOrder(ConfirmedOrderId)).Status);
+        Assert.Equal(1, OkValue(result));
+        Assert.Equal(OrderStatus.Confirmed, OkValue(controller.GetOrder(ConfirmedOrderId)).Status);
     }
 
     private static T OkValue<T>(ActionResult<T> result)

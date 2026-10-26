@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Assessment.Api.Dto;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Assessment.Api.Tests;
@@ -16,11 +17,11 @@ public class OrderEndpointTests
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public static TheoryData<CreateOrderLineRequest> InvalidLines => new()
+    public static TheoryData<CreateOrderLineRequest, string> InvalidLines => new()
     {
-        Line(0, 10m),
-        Line(-1, 10m),
-        Line(1, -0.01m)
+        { Line(0, 10m), nameof(CreateOrderLineRequest.Quantity) },
+        { Line(-1, 10m), nameof(CreateOrderLineRequest.Quantity) },
+        { Line(1, -0.01m), nameof(CreateOrderLineRequest.UnitPrice) }
     };
 
     [Fact]
@@ -54,7 +55,7 @@ public class OrderEndpointTests
 
     [Theory]
     [MemberData(nameof(InvalidLines))]
-    public async Task RejectsInvalidLines(CreateOrderLineRequest line)
+    public async Task RejectsInvalidLines(CreateOrderLineRequest line, string field)
     {
         await using var application = new WebApplicationFactory<Program>();
         using var client = application.CreateClient();
@@ -68,7 +69,12 @@ public class OrderEndpointTests
 
         using var response = await client.PostAsJsonAsync("/api/orders", request, JsonOptions);
 
-        Assert.Contains(response.StatusCode, new[] { HttpStatusCode.BadRequest, HttpStatusCode.UnprocessableEntity });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(400, problem.Status);
+        Assert.Contains(problem.Errors, error => error.Key.EndsWith(field, StringComparison.Ordinal)
+            && error.Value.Length > 0);
     }
 
     [Fact]
@@ -90,7 +96,11 @@ public class OrderEndpointTests
 
         using var response = await client.PostAsJsonAsync("/api/orders", request, JsonOptions);
 
-        Assert.Contains(response.StatusCode, new[] { HttpStatusCode.BadRequest, HttpStatusCode.UnprocessableEntity });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(400, problem.Status);
+        Assert.NotEmpty(problem.Errors["$.lines[0].quantity"]);
     }
 
     [Fact]
@@ -110,7 +120,7 @@ public class OrderEndpointTests
     }
 
     [Fact]
-    public async Task RejectsInvalidStatusChange()
+    public async Task ReturnsToPending()
     {
         await using var application = new WebApplicationFactory<Program>();
         using var client = application.CreateClient();
@@ -122,12 +132,11 @@ public class OrderEndpointTests
 
         using var response = await client.PatchAsJsonAsync($"/api/orders/{request.OrderId}/status", request);
 
-        Assert.Contains(response.StatusCode, new[]
-        {
-            HttpStatusCode.BadRequest, HttpStatusCode.Conflict, HttpStatusCode.UnprocessableEntity
-        });
-        Assert.False(string.IsNullOrWhiteSpace(await response.Content.ReadAsStringAsync()),
-            "A rejected status change should explain why it was rejected.");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(1, await response.Content.ReadFromJsonAsync<int>());
+        var order = await client.GetFromJsonAsync<OrderResponse>($"/api/orders/{request.OrderId}", JsonOptions);
+        Assert.NotNull(order);
+        Assert.Equal(OrderStatus.Pending, order.Status);
     }
 
     private static CreateOrderLineRequest Line(int quantity, decimal unitPrice)

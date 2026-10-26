@@ -1,24 +1,23 @@
-# LexisNexis assessment learning scaffold
+# Order Intake & Tracking
 
-Open **`backend\LexisNexis.Assessment.sln`** for the backend. It contains the API and its test project. The first scaffold used a root `.slnx` because .NET 10's template defaults to that newer solution format. It has now been replaced by one conventional `.sln` inside `backend`; the old file remains recoverable in Git commit `b58bb19`. There are no competing solution files to maintain.
+ASP.NET Core controller API with an Angular standalone frontend. The application submits orders for either seeded customer, lists the newest orders first, shows details in a modal, and changes order status. It uses an in-memory store; restarting the API restores the two seeded orders and discards later changes.
 
-This remains boilerplate for Clayton's Order Intake & Tracking assessment. Four backend endpoint stubs and three Angular pages are connected, with comments quoting the supplied assessment excerpts next to the relevant extension points. **Every order endpoint returns HTTP 501 Not Implemented.** No order is saved and no business rules have been implemented.
+See [SOLUTION.md](SOLUTION.md) for implementation facts and tradeoffs, [VERIFICATION.md](VERIFICATION.md) for actual check results and remaining failures, and [AI_ASSISTANCE.md](AI_ASSISTANCE.md) for AI involvement. This is a local development application, with known limitations listed below.
 
-## Installed toolchain
+## Toolchain
 
 | Tool | Version used |
 | --- | --- |
 | .NET SDK / ASP.NET Core runtime | 10.0.401 / 10.0.12 |
 | Node.js / pnpm | 22.20.0 / 12.14.0 |
-| Angular framework, forms, router | 21.2.25 |
-| Angular CLI / build | 21.2.28 (project-local) |
-| TypeScript / RxJS | 5.9.3 / 7.8.2 |
+| Angular framework / CLI and build | 21.2.25 / 21.2.28 |
+| TypeScript / RxJS / Bulma | 5.9.3 / 7.8.2 / 1.0.4 |
 
-Angular 21 supports the installed Node and TypeScript versions. No global CLI, SDK, or package-manager change is needed. See [Angular compatibility](https://angular.dev/reference/versions) and [.NET 10](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/overview).
+`global.json` selects the .NET 10 SDK with patch roll-forward. Frontend versions and pnpm are recorded in `frontend/package.json`; `pnpm-lock.yaml` is the active lockfile. No global Angular CLI installation is needed.
 
-## Install
+## Install and run on Windows
 
-Run in Windows PowerShell. The `.cmd` commands avoid PowerShell execution-policy issues with script wrappers.
+From the checkout root (the local path used during development is shown):
 
 ```powershell
 Set-Location C:\Github\lexisnexis-assessment
@@ -26,94 +25,89 @@ dotnet restore .\backend\LexisNexis.Assessment.sln --locked-mode
 pnpm.cmd --dir .\frontend install --frozen-lockfile
 ```
 
-`frontend/pnpm-lock.yaml` is the active frontend lockfile. It was imported from the original npm lock; that original is recoverable in `b58bb19`, rather than kept as a second active lock. Package metadata and Angular's CLI configuration now select pnpm. `frontend/pnpm-workspace.yaml` holds pnpm 12's local settings for this single frontend package: the existing patched Undici override, and named native build/cache/watch dependencies permitted to run install scripts. This does not introduce a multi-project architecture or change global settings.
-
-## Run
-
-Terminal 1, from the repository root:
+Start the API in one terminal:
 
 ```powershell
-dotnet run --project .\backend\Assessment.Api
+dotnet run --project .\backend\Assessment.Api --launch-profile http
 ```
 
-Terminal 2, from the repository root:
+Start Angular in another terminal, also from the checkout root:
 
 ```powershell
 pnpm.cmd --dir .\frontend start
 ```
 
-Open <http://localhost:4200>. The shell's **Check API health** button should display `Healthy`. The API health URL is <http://localhost:5080/api/health>. Both servers use local HTTP; no certificate trust step is needed. Stop each terminal with **Ctrl+C**.
+Open <http://localhost:4200>. The API listens on <http://localhost:5080>; <http://localhost:5080/api/health> returns plain-text `Healthy`. Angular forwards `/api/**` to port 5080 using `frontend/src/proxy.conf.json`. Stop each server with Ctrl+C. Restarting the API clears its in-memory changes; an existing process must load new code before newly added endpoints are available.
 
-| Angular route | Learning stub |
-| --- | --- |
-| `/orders` | Calls the list endpoint and displays the expected 501 TODO feedback; has a reload button and an eventual response template. |
-| `/orders/new` | Local FormBuilder form, one input line, add-line example, per-field errors, and submit request wiring. |
-| `/orders/:id` | Loads the route ID, calls detail, and includes optional free-text change-status request wiring. |
-
-The list page links to an explicitly labelled placeholder GUID so the detail stub can be explored before any orders exist. It is not a saved order. There are no sample success responses, invented statuses, or calculated totals.
-
-Angular's dev proxy forwards `/api/**` to `localhost:5080`, using `frontend/src/proxy.conf.json`. A production deployment will need its own routing. See [Angular proxy configuration](https://angular.dev/tools/cli/serve#proxying-to-a-backend-server).
-
-## Backend extension points and provisional contracts
-
-Start in `backend/Assessment.Api/OrdersEndpoints.cs`; `Program.cs` calls `MapOrdersEndpoints()`. Each handler contains its own explicit TODO and 501 ProblemDetails response. Change those methods as you implement, rather than adding layers just to fill in the scaffold.
-
-| Method and path | Handler | Request / intended response shape |
-| --- | --- | --- |
-| `POST /api/orders` | `CreateOrder` | `CreateOrderRequest` / `OrderResponse` |
-| `GET /api/orders` | `ListOrders` | no body / `OrderSummaryResponse[]` |
-| `GET /api/orders/{id:guid}` | `GetOrder` | GUID route ID / `OrderResponse` |
-| `PATCH /api/orders/{id:guid}/status` | `ChangeOrderStatus` | `ChangeOrderStatusRequest` / `OrderResponse` |
-
-`OrderContracts.cs` and `frontend/src/app/order-contracts.ts` contain corresponding shapes. **The route conventions, field names, GUID identifiers, UTC timestamp field, required UI reference/description examples, and plain-string status are scaffold choices made with AI assistance, not mandated assessment details.** Revise them as you design. Requests carry `clientReference` and lines (`description`, `quantity`, `unitPrice`), or a `status` string. The future response shapes include server totals; no calculation or successful response is currently supplied. Decimal handling/rounding and final error behavior remain your decisions.
-
-ASP.NET's ordinary route/JSON binding can reject malformed IDs or JSON before a stub runs. No custom backend quantity/price validation, duplicate handling, sorting, persistence, totals, status vocabulary, or transition policy has been added.
-
-## Angular learning map
-
-| React / application concept | Actual file |
-| --- | --- |
-| Application entry point | `frontend/src/main.ts` bootstraps the standalone `App` class. |
-| App shell / JSX equivalent | `frontend/src/app/app.ts` with `app.html` and `app.css`; its template contains navigation and RouterOutlet. |
-| Route definitions | `frontend/src/app/app.routes.ts`; literal `new` precedes the `:id` route. |
-| App providers / dependency configuration | `frontend/src/app/app.config.ts`. |
-| Shared HTTP client wrapper | `frontend/src/app/api.service.ts`, root-provided and injecting HttpClient. |
-| Request/response types | `frontend/src/app/order-contracts.ts`; backend counterpart `OrderContracts.cs`. |
-| List page | `frontend/src/app/orders/order-list.ts` and `.html`. |
-| Form page and field errors | `frontend/src/app/orders/order-create.ts` and `.html`. |
-| Detail and optional status form | `frontend/src/app/orders/order-detail.ts` and `.html`. |
-| Shared API error display wording | `frontend/src/app/api-error.ts`. |
-| Global styles / build configuration | `frontend/src/styles.css` / `frontend/angular.json`. |
-
-Read **[frontend/LEARNING.md](frontend/LEARNING.md)** for the concrete DI, FormBuilder, template-import and HTTP walkthrough. FormBuilder can be injected into each form component; each component creates and owns its own FormGroup. A root ApiService shares request methods, not form state. `inject(ApiService)` obtains a DI-managed instance; importing its TypeScript class or adding template imports does something different. Constructor injection and inline templates are valid alternatives; field injection and separate templates are used consistently here.
-
-The frontend Validators are requested UX examples. Per-field errors live on each control and are shown by that field's template after touched/dirty or submission. They do not replace the backend validation you still need to implement.
+Use **New order**, choose a customer and currency, fill the line item, then submit. The form displays success, duplicate-reference or error feedback. **Orders** shows the list; **View** opens its detail modal, and the row's status select sends an update.
 
 ## Build and test
 
-From the repository root after install:
-
 ```powershell
 dotnet build .\backend\LexisNexis.Assessment.sln --no-restore --configuration Release
-dotnet test .\backend\LexisNexis.Assessment.sln --no-build --configuration Release --list-tests
 dotnet test .\backend\LexisNexis.Assessment.sln --no-build --configuration Release
-pnpm.cmd --dir .\frontend run build
-pnpm.cmd --dir .\frontend audit
+pnpm.cmd --dir .\frontend build
 ```
 
-The backend suite has five infrastructure cases: one health test and four endpoint wiring cases asserting operation-specific 501 ProblemDetails. **They are not business unit coverage.** The TODO comment points to the brief's requirement to test the critical business rules you eventually implement. There are no empty or pretend-passing business tests and no frontend unit-test suite. Browser smoke checks performed during setup are recorded separately in `VERIFICATION.md`.
+The test suite contains direct controller tests and focused HTTP integration checks. Automatic MVC binding/validation is checked over HTTP; direct action calls do not execute MVC filters. The suite is not currently all green: see [VERIFICATION.md](VERIFICATION.md). No maintained frontend unit-test target is configured; the recorded browser smoke check is separate.
 
-Quick health/proxy check while running both servers:
+## API and contracts
 
-```powershell
-Invoke-RestMethod http://localhost:5080/api/health
-Invoke-RestMethod http://localhost:4200/api/health
+| Method and path | Current response |
+| --- | --- |
+| `GET /api/health` | 200, plain-text `Healthy` |
+| `GET /api/customers` | 200, `CustomerResponse[]` for the two existing customers |
+| `POST /api/orders` | 200, `1` when inserted or `0` for an existing external reference |
+| `GET /api/orders` | 200, full `OrderResponse[]`, newest first |
+| `GET /api/orders/{id:guid}` | 200, `OrderResponse`; a missing order currently returns 204 |
+| `PATCH /api/orders/{id:guid}/status` | 200, `1` when changed or `0` for a missing order/unchanged status |
+
+Create requests contain `externalReference`, `customerId`, `currency`, and `lines`. Each line has `sku`, `name`, integer `quantity`, and decimal `unitPrice`. For example:
+
+```json
+{
+  "externalReference": "EXAMPLE-001",
+  "customerId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "currency": "ZAR",
+  "lines": [
+    { "sku": "ITEM-1", "name": "Example item", "quantity": 2, "unitPrice": 10 }
+  ]
+}
 ```
 
-Both return `Healthy`. Calls to the order stubs should currently receive 501, which is intentional.
+The other seeded customer ID is `bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb`; the UI obtains both from `/api/customers`. An unknown or empty customer ID returns 400 with `Choose an existing customer.`
 
-## Remaining assessment work
+Responses include the customer, timestamps, status, currency, lines, line totals, subtotal, tax and total. IDs are deterministically derived from the exact external-reference string by the current `Guid.NewGuid(string)` helper. Obtain an order's ID from the list response; do not use the obsolete literal GUIDs from the early scaffold.
 
-Implement the business behavior, backend validation and business tests yourself. Decide storage, duplicate/reference semantics, totals/rounding, statuses/transitions, final HTTP errors, and completed UI behavior. `SOLUTION.md` remains an unfilled template for your actual decisions. Continue `AI_ASSISTANCE.md` with later prompts and your review. Final delivery still needs the completed repository and narrated 5–10 minute video.
+JSON property names use camel case. Enums write their declared names: `Pending`, `Confirmed`, `Fulfilled`, `Cancelled`; currencies are `ZAR`, `EUR`, `USD`. The converter also accepts numeric values. Status requests contain `orderId` and `newStatus`; currently the body ID controls the update rather than the route ID.
 
-This task made local changes only. No remote was created and nothing was pushed, published, shared or submitted by the assistant. Any existing Git remote configuration is preserved.
+`OrderController` uses `[ApiController]`: failed JSON binding or request validation returns 400 `ValidationProblemDetails`. Existing line annotations require quantity >= 1 and price >= 0; fractional JSON quantities cannot bind to an integer. The frontend's validators are UX checks, not a substitute for this server handling.
+
+## Code map
+
+| Area | Files |
+| --- | --- |
+| Backend solution | `backend/LexisNexis.Assessment.sln` |
+| MVC registration, JSON options, singleton store | `backend/Assessment.Api/Program.cs` |
+| Order and customer routes | `backend/Assessment.Api/Controllers/` |
+| In-memory implementation / abstraction | `backend/Assessment.Api/Db/OrderDb.cs`, `Interfaces/IOrderDb.cs` |
+| Entities, mappings and totals | `backend/Assessment.Api/Entities/` |
+| Request/response classes and enums | `backend/Assessment.Api/Dto/`, `Enums/` |
+| Controller and HTTP tests | `backend/Assessment.Api.Tests/` |
+| Angular bootstrap / app shell | `frontend/src/main.ts`, `frontend/src/app/app.ts` and `.html` |
+| Routes / DI providers | `frontend/src/app/app.routes.ts`, `app.config.ts` |
+| Root HTTP service / interfaces | `frontend/src/app/api.service.ts`, `dtos/` |
+| Component classes and templates | `frontend/src/app/orders/` |
+| Extracted validator / global styling | `frontend/src/app/one-of.validator.ts`, `frontend/src/styles.css` |
+
+For component, DI and form details, see [frontend/LEARNING.md](frontend/LEARNING.md).
+
+## Current limits
+
+- Storage is process-local, with no persistence or authentication. Customers are derived from the existing orders; there is no customer editor.
+- Reference matching uses the exact string without trimming or case normalization. The form edits one line; it has no add/remove-line controls.
+- The server applies 15% tax for every currency and does not apply an explicit monetary rounding policy. The frontend formats detail totals to two decimal places.
+- No status transition restrictions are active. The earlier Pending/terminal checks are commented out; those specific rules are not treated as assessment requirements. Undefined numeric statuses are still accepted.
+- The status route/body ID mismatch and numeric-enum validation remain unresolved. Status failures are logged to the browser console rather than shown as detailed UI feedback.
+- The detail modal works through the list's selected ID. The declared `/orders/:id` route does not currently bind its route parameter to the component input.
+- Release builds retain nullable warnings and a frontend bundle-budget warning. Verification is recorded with its date and limitations, not represented as complete business coverage.

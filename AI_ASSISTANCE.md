@@ -1,70 +1,97 @@
 # AI assistance log
 
-## 2026-10-25 — initial scaffold
+Written by OpenAI Codex and updated on 2026-10-26 from the available conversation, Git history and current files. Quoted prompts below are verbatim excerpts unless labelled otherwise; summaries are not a reconstructed transcript. This records substantial AI involvement and user-led work without claiming Clayton endorsed every assistant choice or inventing his reasoning.
 
-**Contributor:** OpenAI Codex. This log was written by the assistant. It does not claim that Clayton has reviewed the scaffold or adopted the assistant's choices.
+## 2026-10-25: initial setup
 
-### User prompt (verbatim)
+User prompt (verbatim):
 
 > Can you make a boilerplate repo and project for me, for when I start work on the assessment?
 > I don’t even know how to setup angular, let alone how it works…
 
-### Execution brief supplied to the assistant (summary, not a verbatim user quote)
+Execution brief (summary): create a small runnable local repository, Angular standalone frontend, ASP.NET Core backend and infrastructure test; setup only, with no assessment business implementation. Verify compatibility, commands, builds and server startup. Do not publish or submit.
 
-Create a minimal runnable local Git repository for Clayton's LexisNexis assessment on Clayton-PC, preferably in a new folder under C:\Github after checking for existing work. Setup only: Angular standalone, ASP.NET Core on installed stable .NET 8+ tooling, a health-only API, a meaningful infrastructure smoke test, local proxy wiring, and documentation. Verify official compatibility, builds, test discovery/execution, and both servers. Include exact Windows commands, a React-to-Angular file map, an unfilled SOLUTION.md, and an honest AI prompt log. Do not implement order domain, business rules, CRUD, validation, deduplication, totals, or status flows. Do not publish, submit, share, contact recruiters, create credentials, or run REA tools/server processes. Commit locally only if an existing Git identity is available.
+The assistant generated the projects, selected the installed compatible .NET 10/Angular 21 toolchain, added health/proxy wiring, pinned dependencies and wrote the original documentation. It repaired an npm lock-generation problem with a temporary npm invocation and added a project-local Undici override after checking an advisory. The initial scaffold was committed locally. These were assistant setup choices, not Clayton's personal rationale.
 
-### Assistant delegation prompts
+## 2026-10-25: endpoint scaffolding, pnpm and overreach
 
-The assistant used a read-only helper for two tasks:
+User prompt excerpts:
 
-1. Verify current official Angular/Node/TypeScript compatibility and recommend stable versions using the installed tools; suggest one meaningful ASP.NET health smoke test with minimal dependencies. No file edits or server processes.
-2. Review the staged scaffold for setup-only scope, backend test correctness, frontend health/proxy wiring, and leftover generated test or MCP configuration. No edits or business implementation.
-
-These are summaries of internal helper prompts, not statements from Clayton. The helper reported compatible Angular 21 tooling and no blocking code issues in its read-only scaffold review.
-
-### Work produced by AI
-
-- Generated the Angular standalone workspace and .NET API/test solution using official CLI templates, then reduced the starter to a health-check page and endpoint.
-- Selected .NET 10 because SDK 10.0.401 was installed and is LTS. Selected Angular 21 with TypeScript 5.9 because the installed Node 22.20.0 is supported by that combination; Angular 22 requires a newer Node release and TypeScript 6.
-- Added HttpClient/signal health wiring, the local development proxy, and one test of the real ASP.NET health endpoint. This is infrastructure integration coverage, not assessment business coverage.
-- Added Git ignore rules, pinned dependencies and lockfiles, run/build/test instructions, the file map, this log, and the unfilled decision template.
-- Used a temporary npm 11.6.2 invocation to generate the initial lockfile after installed npm 10.9.3 crashed in optional-peer dependency resolution. A subsequent clean install with installed npm 10.9.3 succeeded; no global package manager was changed.
-- Inspected npm audit's reported Angular build dependency advisory and pinned the same-major patched transitive `undici` 7.30.1 via a package override. Rechecked the locked install, audit, build, and startup after that change.
-- Ran the checks recorded in VERIFICATION.md. All assessment implementation and business tests remain Clayton's work.
-
-These are assistant setup decisions. No personal implementation reasoning from Clayton has been fabricated. Continue this file with later prompts and, separately, Clayton's actual review and reasoning.
-
-## 2026-10-25 — endpoint and Angular learning stubs; pnpm migration
-
-### Follow-up user prompt (verbatim excerpts)
-
-> Not seeing a solution file for the backend there gizmo, also this backend isn't exactly setup for easy addition. Please add me all the boilerplate for the endpoints I'll need.
+> Please add me all the boilerplate for the endpoints I'll need.
 > And same for the frontend, just stubs and boilerplate I can add things to and learn as I go.
-> Include comments with the exact excerpt from the assessment for what it's intended to do to the boilerplate, so I have a better idea of why chose to add certain bits.
 
 > Not sure why you went with `npm` as the package manager, I have `yarn` and `pnpm` installed, personally prefer that.
 
-> For the forms, I'm thinking to inject FormBuilder into the project and using Validators for frontend validation. Not sure where to do that in Angular, or whether it allows for per field validation errors/messages.
+The user also asked about FormBuilder, field validation, injection and HttpClient (summary). The assistant added a conventional `.sln`, provisional contracts, explicit 501 order handlers, Angular routes/pages, HTTP methods, forms, validation messages and page behavior. It migrated the local package setup to installed pnpm without global changes.
 
-> HTTP seems quite straightforward as well, just need to write an ApiService and inject it as well, once again, not sure where or how to inject that beside just `inject(ApiService)`...
+The frontend work exceeded the requested empty stubs/learning scope. Clayton objected and explicitly approved removing the assistant's frontend implementation. The assistant reduced its components/services to empty stubs, preserving DTOs, configuration, Git history, a scoped backup and current user changes. Early documentation saying all business work remained Clayton's was only true of the initial scaffold, not a claim about the later combined codebase.
 
-These are excerpts, not a reproduction of the entire follow-up message. The execution brief authorized stubs and learning validation examples, while keeping backend business implementation out of scope. It supplied the exact assessment excerpts used in source comments.
+## 2026-10-25: user model, controllers and tests
 
-### Assistant helper prompts (summaries)
+User instructions (summary): use his added entities and database abstraction; replace record contracts with separate DTO classes, add MVC controllers and singleton injection, fill mapping methods, seed small test data, and split frontend interfaces. Preserve his files and avoid unrelated implementation.
 
-- Backend helper: add one conventional solution in backend, provisional contracts and four endpoint extension points returning explicit 501; quote the supplied assessment excerpts; add wiring tests while leaving business rules TODO. Edit only the isolated clone's backend and retired root solution; no final-target edits or commit.
-- Frontend helper: add standalone routes/pages, root ApiService, local FormBuilder examples and per-field errors; call real 501 stubs and avoid fake data, totals, sorting or status policy. Edit only frontend source in the isolated clone.
-- Frontend helper follow-up: write a temporary browser smoke script outside the repository to verify actual routes, form messages, requests and expected 501 responses using installed Edge; no server or dependency installation by the helper.
+The assistant performed that migration, mappings and seeding. Clayton supplied and developed the entities, `IOrderDb`/`OrderDb`, reference-derived IDs and order behavior. He later implemented the frontend list, detail modal, status updates and local form/validator work. This is a scope summary supported by the conversation and changes, not a line-by-line authorship audit. The assistant also modified these areas when specifically requested, including the later customer association.
 
-### AI choices and work
+User test request (verbatim excerpt):
 
-- Inspected the local Git state before work; it matched `b58bb19`. Preserved the existing ignored IDE folder. Prepared changes in an isolated local clone and checked touched paths against the original before applying, to avoid overwriting concurrent user edits.
-- Replaced the root `.slnx` with `backend/LexisNexis.Assessment.sln`, keeping one current solution. The original remains in Git history.
-- Chose provisional HTTP routes, DTO field names, GUID IDs, timestamp shape, response-only total fields and free-text status. These are scaffolding choices, not assertions that the brief mandates them or that Clayton has adopted them. No status vocabulary/transition or monetary calculation was chosen.
-- Added endpoint signatures and operation-specific 501 ProblemDetails. Added wiring tests rather than business behavior or business coverage claims.
-- Added Angular list/create/detail components, separate templates, ApiService methods, and component-local forms. Frontend required/min/pattern validation and per-field wording are learning/UX examples only. Required reference/description controls are provisional choices. Backend validation remains TODO.
-- Used installed pnpm 12.14.0, imported the existing lockfile, added forms/router at matching Angular versions, and moved the patched Undici override to pnpm's local settings. Named native build dependencies are explicitly allowed; no global install/configuration was changed. The old npm lock is preserved by Git history rather than maintained alongside pnpm's lock.
-- Updated README and added frontend/LEARNING.md to distinguish providers, injection and template imports; explain local forms, root HTTP service, subscriptions and signals; and identify remaining candidate decisions.
-- Ran the checks recorded in VERIFICATION.md. No assessment business implementation, public remote, sharing, submission or recruiter contact was performed.
+> Please add the necessary unit tests for the endpoints please. And I want the code looking pristine. Remember the commandments.
 
-Clayton's reasoning and endorsement have not been fabricated. SOLUTION.md remains his unfilled decision template.
+The assistant added direct controller tests and focused HTTP checks. Clayton then objected to awkward names and handwritten/string-oriented inputs. The assistant revised the tests to short behavior names, typed DTOs and typed JSON reads/writes. A fractional quantity uses an anonymous wire object because the request DTO's integer cannot hold `1.5`. Failures were reported rather than changing product logic to make tests pass. Clayton supplied the missing `MapControllers` fix; the assistant reran against it.
+
+## 2026-10-25: styling, modal and enum JSON
+
+User prompt excerpts:
+
+> Okay cool. Can you add Bulma to the frontend so there's at least some basic styling and some html ONLY boilerplate for the components.
+
+> Please make the html of order details a modal
+
+> On the backend, please add JSON configuration to return enums as strings automatically.
+
+The assistant installed Bulma locally with pnpm, imported its CSS and added static HTML templates. A later HTML-only pass wrapped the detail content in a Bulma modal, leaving open/close wiring to Clayton. It added `JsonStringEnumConverter()` to existing MVC JSON options, preserving enum name casing and default integer acceptance. It verified serialization/deserialization using a temporary isolated API instance and stopped it. Clayton subsequently wired the modal and other views himself.
+
+## 2026-10-26: create form and existing customers
+
+User prompt excerpt:
+
+> Hook up the basics on the html side. Input <-> Form
+> And Form Submit.
+>
+> You may need to add a basic Customer List api so you can select which customer an order is linked to as well.
+>
+> Just use the existing two Customers in the seeded data.
+
+Additional user prompts:
+
+> Also, do me a favour and extract the oneOf validator function into a separate .ts file please.
+
+> You may also need to update the tests, given that I've altered the Ids to match how things are structured.
+
+The assistant bound the existing FormGroup/FormArray to HTML, subscribed to submission, and added submission state plus success/duplicate/error feedback. It added customer listing from the existing seeded entities, a customer ID request field and selection/association. No new sample customers were added. It extracted `oneOf` without changing its behavior and aligned test fixtures with Clayton's current IDs and string enums.
+
+Builds, tests, an isolated real-browser flow and small temporary validator checks were run. The browser verified creation, duplicates, customer/totals, list, detail and status updates. Existing user servers/data were preserved; temporary processes stopped. Full test results were not all passing; see [VERIFICATION.md](VERIFICATION.md).
+
+## 2026-10-26: feedback, documentation and MVC validation
+
+User feedback (verbatim excerpts):
+
+> Hmmm... It did slightly more than I wanted on the form submission side of things, but it's looking mostly good.
+> Failing the lick tests here in OrderDb...
+
+> Commented out the Status checks. Just made more sense to me to have them, but I guess that wasn't in the spec.
+
+> Update all the README files etc. and AI logs as needed.
+
+The assistant recorded that feedback and did not refactor `OrderDb`, reduce submission behavior or restore the commented-out transition checks. Documentation was rewritten against the implementation, separating facts, recommendations and missing verification. No specific Pending/terminal transition policy is presented as an assessment requirement.
+
+After an explanation of standard `[ApiController]` invalid-model handling, the user replied:
+
+> Okay, please address that. Why isn't it doing normal Model State validation?
+
+The assistant's earlier controller setup lacked `[ApiController]`. The request annotations were already on properties, but MVC did not automatically stop the action on invalid ModelState; fractional input left a null DTO and caused a 500. The assistant added the standard controller attribute, strengthened HTTP validation checks, and updated tests that still assumed the removed transition restrictions. It did not add custom parsing or restore those restrictions. Final outcomes and unresolved issues are in [VERIFICATION.md](VERIFICATION.md).
+
+## Attribution and limits
+
+The assistant used helper agents for bounded code/doc work, compatibility review, ownership checks and verification. This paragraph summarizes those internal tasks; it is not an exact delegation transcript. Temporary test/browser tooling lived outside the repository and is not a maintained frontend test suite.
+
+This log is not a claim that Clayton wrote all current code or that AI wrote all current code. Clayton's own review, explanations and final video remain his work. The assistant did not create credentials, run REA tools, publish/push the later changes, submit the assessment, share it, or contact recruiters. Existing remote configuration and user-created commits were preserved.

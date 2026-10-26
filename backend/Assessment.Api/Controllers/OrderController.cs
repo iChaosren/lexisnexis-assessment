@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Assessment.Api.Controllers;
 
+[ApiController]
 [Route("api/orders")]
 public class OrderController(IOrderDb orderDb) : Controller
 {

@@ -1,68 +1,47 @@
-# Scaffold verification
+# Verification record
 
-Latest expansion checks on Clayton-PC, 2026-10-25. Initial scaffold history and its previous verification record remain in commit `b58bb19`.
+Updated 2026-10-26. Results below describe the stated source snapshot and checks, not a claim of complete business coverage. The initial health/501 scaffold records are historical and remain in Git history; they no longer describe this application.
 
-## Scope and versions
+## Current backend checks
 
-The scaffold uses .NET SDK 10.0.401, target net10.0, ASP.NET Core runtime 10.0.12, Node 22.20.0, installed pnpm 12.14.0, Angular/framework/forms/router 21.2.25, Angular CLI/build 21.2.28, TypeScript 5.9.3, RxJS 7.8.2, and patched transitive Undici 7.30.1. Backend test dependencies remain Microsoft.AspNetCore.Mvc.Testing 10.0.12, Microsoft.NET.Test.Sdk 17.14.1, xUnit 2.9.3 and Visual Studio runner 3.1.4.
+On the current validation-fixed source (2026-10-26), the Release build passed with 0 errors and 5 existing CS8618 nullable warnings in `Order`/`LineItem`. The full suite ran 27 cases: **26 passed, 1 failed, 0 skipped**.
 
-The only current solution is `backend/LexisNexis.Assessment.sln`, containing Assessment.Api and Assessment.Api.Tests. Original `.slnx` and npm lockfile remain recoverable in Git history; they are no longer competing active files.
+Quantities `0`/`-1`, price `-0.01`, and fractional quantity `1.5` now return 400 with typed `ValidationProblemDetails`. Tests that assumed the removed Pending/terminal restrictions now check the actual unrestricted status behavior and pass.
 
-## Preserving the working folder
+The remaining failing test is `OrderEndpointTests.RejectsUnknownStatus`: numeric status `999` returns 200. Neither a status-value validation annotation nor stricter numeric-enum parsing was added; this is separate from normal ModelState handling and transition policy.
 
-Before changes, the final repository was inspected and matched `b58bb19` with no tracked changes. Existing ignored `.idea` content was left alone. Changes were prepared in an isolated local clone at `C:\Users\myccb\Documents\Codex\2026-10-25\task\lexisnexis-expansion`. Touched files are checked against the original Git blob before applying, and new paths must be absent. This preserves unrelated/concurrent user work rather than copying an entire tree over it.
+Commands run from `C:\Github\lexisnexis-assessment`:
 
-## Completed isolated checks
+```powershell
+dotnet build .\backend\LexisNexis.Assessment.sln --no-restore --configuration Release
+dotnet test .\backend\LexisNexis.Assessment.sln --no-build --configuration Release
+```
 
-| Check | Result |
-| --- | --- |
-| `pnpm.cmd --dir .\frontend import` | Imported original npm lock into pnpm 12 format. |
-| `pnpm.cmd --dir .\frontend install --frozen-lockfile` | Passed; matching forms/router packages and lockfile. |
-| `pnpm.cmd --dir .\frontend audit` | No known vulnerabilities reported. |
-| `pnpm.cmd --dir .\frontend run build` | Passed; initial production bundle 251.56 kB plus lazy route chunks. |
-| `pnpm.cmd --dir .\frontend list --depth=0` | Twelve direct packages matched expected versions. |
-| `dotnet restore .\backend\LexisNexis.Assessment.sln --locked-mode` | Passed for both projects. |
-| `dotnet build .\backend\LexisNexis.Assessment.sln --no-restore --configuration Release` | Passed; zero warnings and errors. |
-| `dotnet test .\backend\LexisNexis.Assessment.sln --no-build --configuration Release --list-tests` | Discovered health case plus four endpoint theory cases. |
-| `dotnet test .\backend\LexisNexis.Assessment.sln --no-build --configuration Release` | Five passed, zero failed, zero skipped. |
+Direct controller tests cover creation, repeated references, newest-first listing, detail/totals, customer association and status updates. They do not execute MVC model-binding/filter behavior. HTTP tests cover serialization, missing responses, customer listing/rejection and invalid request handling through `WebApplicationFactory` with fresh in-memory stores.
 
-Five backend cases cover real pipeline/route wiring only: health 200 and four operation-specific 501 ProblemDetails. No business tests have been implemented or counted as coverage. No empty or skipped business tests were added.
+Validation repair: `[ApiController]` now returns standard 400 `ValidationProblemDetails` for failed binding or request annotations. The prior fractional-input 500 came from the action dereferencing a null DTO after failed integer binding. Zero/negative quantities and negative prices previously reached the action despite ModelState errors. No custom parser or restored transition policy was added.
 
-pnpm initially finished downloading but returned `ERR_PNPM_IGNORED_BUILDS` for named native Angular dependencies. Their install scripts were inspected and added to the project-local allowBuilds map. The subsequent frozen install passed. There was no repeated retry of the unresolved condition and no global package-manager/configuration change. Build/restore/test required the normal approved execution environment because the filesystem/network sandbox did not provide usable execution.
+## Latest frontend and browser checks
 
-## Actual server and browser smoke checks
+These checks ran on 2026-10-26 before the subsequent documentation/MVC-validation pass. Frontend source is unchanged by that later pass.
 
-At **2026-10-25T19:05:55Z**, both documented commands were started from the isolated copy: `dotnet run --project .\backend\Assessment.Api` and `pnpm.cmd --dir .\frontend start`. Ports were free before launch. Direct API health and proxied health both returned HTTP 200 with `Healthy`; Angular root returned 200.
+- `pnpm.cmd --dir .\frontend build` passed. The initial production bundle was 934.61 kB, exceeding the configured 500 kB warning budget but below its 1 MB error budget.
+- A temporary isolated Edge/Playwright check passed seven checks using separate API/frontend ports, the real proxy and no mocked API responses.
+- It verified two seeded customers and form defaults; no submit for invalid form; numeric/currency/customer payloads and success feedback; repeat-reference feedback with no duplicate; newest-first listing, selected customer and server totals; list/detail-modal/close/status-update flows; and no browser page errors.
+- Four temporary checks confirmed `oneOf` accepts allowed values, rejects others and retains strict value matching.
 
-A temporary Playwright-core 1.56.1 script outside the repository used installed Edge headlessly with an isolated temporary context, no persistent user profile, and no API interception/mocks. It passed ten real-browser checks:
+Temporary browser/server processes were stopped. The user's existing servers on 4200 and 5080 were left running with their in-memory data. At the end of that create/customer pass, the old 5080 process still returned 404 for the new customer route; a running process must load the new assembly before that endpoint is available. Current live-server state has not been rechecked by this documentation pass.
 
-- List route mounts and shows the real 501 response, with no fake order rows.
-- New-order navigation mounts its component and empty submit shows reference/description field messages without sending a request.
-- Quantity 1.5 and price -1 show their individual UX messages.
-- A valid example input sends only reference/line inputs, no totals, and receives 501.
-- Add-line adds local FormArray controls without creating an order.
-- Placeholder detail route requests the example GUID and shows 501, with no fake detail.
-- Blank optional status input shows its field message without sending PATCH.
-- A free-text status input sends the expected PATCH body and receives 501.
-- The health button reaches the API through the frontend proxy and displays Healthy.
-- There are no unexpected page/console errors; expected 501 resource errors are excluded.
+## Earlier snapshot and interpretation
 
-Both server/listener process trees and the temporary browser were closed. Cleanup confirmed no listeners on 4200 or 5080. Temporary smoke tooling is task-local and is not a maintained frontend test suite or a new project dependency.
+Before the status checks were commented out, the create/customer pass ran 27 backend cases: 21 passed and 6 failed. After their removal, a fresh pre-repair run executed 27: 18 passed and 9 failed. Four of those later failures encoded the old Pending/terminal policy; the others exposed numeric-input and undefined-enum handling. These historical counts are not the final result above.
 
-## Intentional TODOs and limits
+The source-level review also found the status action uses the body ID instead of its route ID, and the standalone detail route does not bind its ID to the component input. These are recorded findings, not fixes performed during the validation work.
 
-No persistence, order creation, duplicate/reference semantics, newest-first sorting, server validation, totals/rounding, status vocabulary or transition rules have been implemented. DTOs, route names, GUID shape and UI required-field examples are provisional scaffold choices. Ordinary ASP.NET JSON/route binding still exists. Response DTOs describe future shapes and do not provide fake responses.
+No maintained frontend unit-test target is configured. A fresh locked install, current dependency audit, production deployment, final video and GitHub access/submission were not verified in this pass. No original brief file was found in the repository; the requirement review used the supplied excerpts.
 
-Frontend validators are learning/UX examples, not backend business validation. The optional status UI is only request wiring. SOLUTION.md remains unfilled, and no candidate reasoning or final video has been fabricated. No remote creation, publication, sharing, submission, recruiter contact or REA server/tool use occurred.
+## Scope and provenance
 
-## Final repository recheck
+Documentation and the explicitly requested standard MVC validation/test adjustment were the only changes in this pass. Status restrictions stayed commented out; `OrderDb` and frontend submission logic were not refactored. No packages were added, no existing server was restarted, and no commit/push/publication/submission was performed.
 
-The guarded patch was applied successfully to **C:\Github\lexisnexis-assessment** after verifying all 30 touched paths against the original and confirming new paths did not exist. The ignored IDE folder was preserved.
-
-At the final path, the exact README pnpm install command passed with the normal pnpm store (no task-cache flag needed), the production build passed with the same 251.56 kB initial bundle, and audit reported no known vulnerabilities. Conventional-solution locked restore/build, test discovery, and test execution were repeated successfully: zero build warnings/errors; five passed, zero failed/skipped. `dotnet sln ... list` confirmed both API/test projects.
-
-The full ten-check real-browser run was repeated at **2026-10-25T19:10:13Z** against this final path. All routes, field errors, real 501 request bodies/responses, and health proxy passed again with no unexpected browser errors. Both temporary servers and the isolated browser were stopped; no listener remained on 4200 or 5080.
-
-Staged files were checked against the isolated patch, and touched working files were checked for concurrent edits before committing. `git diff --cached --check` passed. No unrelated user files were staged for this change.
-
-At handoff, `git remote -v` showed an existing origin of `https://github.com/iChaosren/lexisnexis-assessment.git`. This task did not configure that remote or create a GitHub repository, and did not fetch from or push to it. The configuration was preserved. The statement above about remote creation/publication describes this assistant's actions, not a claim about the user's repository history.
+Temporary TRX/browser artifacts are outside the repository under the task workspace; they are supporting execution evidence, not portable repository tests. Re-run the commands above to reproduce current results.
