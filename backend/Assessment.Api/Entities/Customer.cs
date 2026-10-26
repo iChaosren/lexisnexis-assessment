@@ -7,6 +7,9 @@ public sealed class Customer : IMapToDto<CustomerResponse>
     public required string Name { get; set; }
     
     public required string Email { get; set; }
+    
+    // If this were a DB entry:
+    // public List<Order> Orders { get; set; }
 
     public CustomerResponse ToDto()
     {

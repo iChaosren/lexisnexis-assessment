@@ -10,7 +10,7 @@ public class OrderController(IOrderDb orderDb) : Controller
     [HttpPost]
     public ActionResult<int> CreateOrder([FromBody] CreateOrderRequest dto)
     {
-        if (!orderDb.ListCustomers().Any(customer => customer.Id == dto.CustomerId))
+        if (orderDb.ListCustomers().All(customer => customer.Id != dto.CustomerId))
             return BadRequest("Choose an existing customer.");
 
         return Ok(orderDb.Create(dto));
@@ -26,5 +26,12 @@ public class OrderController(IOrderDb orderDb) : Controller
 
     [HttpPatch("{id:guid}/status")]
     public ActionResult<int> ChangeOrderStatus(Guid id, [FromBody] ChangeOrderStatusRequest dto)
-        => Ok(orderDb.ChangeOrderStatus(dto));
+    {
+        if (id == dto.OrderId)
+            return Ok(orderDb.ChangeOrderStatus(dto));
+        
+        ModelState.AddModelError(nameof(dto.OrderId), "Order ID must match the route.");
+        return ValidationProblem(ModelState);
+
+    }
 }

@@ -103,20 +103,57 @@ public class OrderEndpointTests
         Assert.NotEmpty(problem.Errors["$.lines[0].quantity"]);
     }
 
-    [Fact]
-    public async Task RejectsUnknownStatus()
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0)]
+    [InlineData(999)]
+    public async Task RejectsUnknownStatus(int status)
     {
         await using var application = new WebApplicationFactory<Program>();
         using var client = application.CreateClient();
         var request = new ChangeOrderStatusRequest
         {
             OrderId = Guid.NewGuid("TEST-ORDER-001"),
-            NewStatus = (OrderStatus)999
+            NewStatus = (OrderStatus)status
         };
 
         using var response = await client.PatchAsJsonAsync($"/api/orders/{request.OrderId}/status", request);
 
-        Assert.Contains(response.StatusCode, new[] { HttpStatusCode.BadRequest, HttpStatusCode.UnprocessableEntity });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(400, problem.Status);
+        Assert.NotEmpty(problem.Errors[nameof(ChangeOrderStatusRequest.NewStatus)]);
+        var order = await client.GetFromJsonAsync<OrderResponse>($"/api/orders/{request.OrderId}", JsonOptions);
+        Assert.NotNull(order);
+        Assert.Equal(OrderStatus.Pending, order.Status);
+    }
+
+    [Fact]
+    public async Task RejectsMismatchedOrderId()
+    {
+        await using var application = new WebApplicationFactory<Program>();
+        using var client = application.CreateClient();
+        var routeId = Guid.NewGuid("TEST-ORDER-001");
+        var request = new ChangeOrderStatusRequest
+        {
+            OrderId = Guid.NewGuid("TEST-ORDER-002"),
+            NewStatus = OrderStatus.Cancelled
+        };
+
+        using var response = await client.PatchAsJsonAsync($"/api/orders/{routeId}/status", request, JsonOptions);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(400, problem.Status);
+        Assert.Contains("Order ID must match the route.", problem.Errors[nameof(ChangeOrderStatusRequest.OrderId)]);
+        var routeOrder = await client.GetFromJsonAsync<OrderResponse>($"/api/orders/{routeId}", JsonOptions);
+        var bodyOrder = await client.GetFromJsonAsync<OrderResponse>($"/api/orders/{request.OrderId}", JsonOptions);
+        Assert.NotNull(routeOrder);
+        Assert.NotNull(bodyOrder);
+        Assert.Equal(OrderStatus.Pending, routeOrder.Status);
+        Assert.Equal(OrderStatus.Confirmed, bodyOrder.Status);
     }
 
     [Fact]
@@ -130,7 +167,7 @@ public class OrderEndpointTests
             NewStatus = OrderStatus.Pending
         };
 
-        using var response = await client.PatchAsJsonAsync($"/api/orders/{request.OrderId}/status", request);
+        using var response = await client.PatchAsJsonAsync($"/api/orders/{request.OrderId}/status", request, JsonOptions);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(1, await response.Content.ReadFromJsonAsync<int>());

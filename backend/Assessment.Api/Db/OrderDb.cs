@@ -4,7 +4,7 @@ using Assessment.Api.Dto;
 
 public sealed class OrderDb : IOrderDb
 {
-    private ConcurrentDictionary<Guid, Order> orderList = new()
+    private readonly ConcurrentDictionary<Guid, Order> orderList = new()
     {
         [Guid.NewGuid("TEST-ORDER-001")] = new Order
         {

@@ -2,7 +2,7 @@
 
 ASP.NET Core controller API with an Angular standalone frontend. The application submits orders for either seeded customer, lists the newest orders first, shows details in a modal, and changes order status. It uses an in-memory store; restarting the API restores the two seeded orders and discards later changes.
 
-See [SOLUTION.md](SOLUTION.md) for implementation facts and tradeoffs, [VERIFICATION.md](VERIFICATION.md) for actual check results and remaining failures, and [AI_ASSISTANCE.md](AI_ASSISTANCE.md) for AI involvement. This is a local development application, with known limitations listed below.
+See [SOLUTION.md](SOLUTION.md) for implementation facts and tradeoffs, [VERIFICATION.md](VERIFICATION.md) for dated check results and known limits, and [AI_ASSISTANCE.md](AI_ASSISTANCE.md) for AI involvement. This is a local development application, with known limitations listed below.
 
 ## Toolchain
 
@@ -49,7 +49,7 @@ dotnet test .\backend\LexisNexis.Assessment.sln --no-build --configuration Relea
 pnpm.cmd --dir .\frontend build
 ```
 
-The test suite contains direct controller tests and focused HTTP integration checks. Automatic MVC binding/validation is checked over HTTP; direct action calls do not execute MVC filters. The suite is not currently all green: see [VERIFICATION.md](VERIFICATION.md). No maintained frontend unit-test target is configured; the recorded browser smoke check is separate.
+The test suite contains direct controller tests and focused HTTP integration checks. Automatic MVC binding/validation is checked over HTTP; direct action calls do not execute MVC filters. The latest recorded backend run on 2026-10-26 passed all 30 cases with no failures or skips: see [VERIFICATION.md](VERIFICATION.md). No maintained frontend unit-test target is configured; the recorded browser smoke check is separate.
 
 ## API and contracts
 
@@ -60,7 +60,7 @@ The test suite contains direct controller tests and focused HTTP integration che
 | `POST /api/orders` | 200, `1` when inserted or `0` for an existing external reference |
 | `GET /api/orders` | 200, full `OrderResponse[]`, newest first |
 | `GET /api/orders/{id:guid}` | 200, `OrderResponse`; a missing order currently returns 204 |
-| `PATCH /api/orders/{id:guid}/status` | 200, `1` when changed or `0` for a missing order/unchanged status |
+| `PATCH /api/orders/{id:guid}/status` | 200, `1` when changed or `0` for a missing order/unchanged status; 400 for an undefined status or mismatched IDs |
 
 Create requests contain `externalReference`, `customerId`, `currency`, and `lines`. Each line has `sku`, `name`, integer `quantity`, and decimal `unitPrice`. For example:
 
@@ -79,7 +79,7 @@ The other seeded customer ID is `bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb`; the UI o
 
 Responses include the customer, timestamps, status, currency, lines, line totals, subtotal, tax and total. IDs are deterministically derived from the exact external-reference string by the current `Guid.NewGuid(string)` helper. Obtain an order's ID from the list response; do not use the obsolete literal GUIDs from the early scaffold.
 
-JSON property names use camel case. Enums write their declared names: `Pending`, `Confirmed`, `Fulfilled`, `Cancelled`; currencies are `ZAR`, `EUR`, `USD`. The converter also accepts numeric values. Status requests contain `orderId` and `newStatus`; currently the body ID controls the update rather than the route ID.
+JSON property names use camel case. Enums write their declared names: `Pending`, `Confirmed`, `Fulfilled`, `Cancelled`; currencies are `ZAR`, `EUR`, `USD`. The converter also accepts numeric values, but `NewStatus` additionally uses `[EnumDataType(typeof(OrderStatus))]` to reject undefined statuses such as `999`. Status requests contain `orderId` and `newStatus`; the body ID must match the route ID. An undefined status or ID mismatch returns 400 `ValidationProblemDetails` without changing an order.
 
 `OrderController` uses `[ApiController]`: failed JSON binding or request validation returns 400 `ValidationProblemDetails`. Existing line annotations require quantity >= 1 and price >= 0; fractional JSON quantities cannot bind to an integer. The frontend's validators are UX checks, not a substitute for this server handling.
 
@@ -107,7 +107,9 @@ For component, DI and form details, see [frontend/LEARNING.md](frontend/LEARNING
 - Storage is process-local, with no persistence or authentication. Customers are derived from the existing orders; there is no customer editor.
 - Reference matching uses the exact string without trimming or case normalization. The form edits one line; it has no add/remove-line controls.
 - The server applies 15% tax for every currency and does not apply an explicit monetary rounding policy. The frontend formats detail totals to two decimal places.
-- No status transition restrictions are active. The earlier Pending/terminal checks are commented out; those specific rules are not treated as assessment requirements. Undefined numeric statuses are still accepted.
-- The status route/body ID mismatch and numeric-enum validation remain unresolved. Status failures are logged to the browser console rather than shown as detailed UI feedback.
+- No status transition restrictions are active between defined statuses. The earlier Pending/terminal checks are commented out; those specific rules are not treated as assessment requirements.
+- Status failures are logged to the browser console rather than shown as detailed UI feedback.
 - The detail modal works through the list's selected ID. The declared `/orders/:id` route does not currently bind its route parameter to the component input.
 - Release builds retain nullable warnings and a frontend bundle-budget warning. Verification is recorded with its date and limitations, not represented as complete business coverage.
+
+Clayton confirms that the repository is public and the AI log has been reviewed. The narrated walkthrough is still outstanding.

@@ -28,18 +28,18 @@ List, detail-modal and status-selection implementation was led by Clayton. The a
 
 The order controller now has `[ApiController]`. Its [standard filter](https://learn.microsoft.com/aspnet/core/web-api#automatic-http-400-responses) returns 400 for invalid ModelState before the action executes. Request quantity/price annotations are on properties, and JSON fractional quantities fail integer binding. Previously the missing attribute allowed invalid values into the action and a null DTO dereference produced 500 for fractional input. No custom number parser or manual ModelState workaround was added.
 
-Status updates currently change any differing status on an existing order and update its timestamp. Missing orders and unchanged statuses return `0`. Clayton commented out the previous Pending/terminal restrictions; they remain disabled. The supplied brief asks for sensible status behavior and feedback but does not prescribe those particular transitions. String enum JSON support does not itself reject undefined numeric enum values.
+Status requests now validate `NewStatus` with `[EnumDataType(typeof(OrderStatus))]`; undefined values such as `999` return 400 `ValidationProblemDetails`. The action also returns 400 validation details when its route and body order IDs differ, without changing either order. For matching IDs, any differing defined status can replace the existing status and update its timestamp. Missing orders and unchanged statuses return `0`. Clayton commented out the previous Pending/terminal restrictions; they remain disabled. The supplied brief asks for sensible status behavior and feedback but does not prescribe those particular transitions.
 
 ## Verification and remaining work
 
-See [VERIFICATION.md](VERIFICATION.md) for dated build/test/browser results. Direct controller tests cover store/action behavior; HTTP tests cover MVC binding, validation and serialization. A passing infrastructure check is not represented as complete business coverage.
+See [VERIFICATION.md](VERIFICATION.md) for dated build/test/browser results. The latest recorded backend run on 2026-10-26 passed all 30 tests, including undefined-status and ID-mismatch rejection. Direct controller tests cover store/action behavior; HTTP tests cover MVC binding, validation and serialization. A passing infrastructure check is not represented as complete business coverage.
 
-Remaining implementation concerns include undefined numeric status acceptance and the status endpoint using the body ID instead of checking its route ID. The direct detail URL lacks parameter-to-input wiring. There is no persisted store, multi-line UI editor or maintained frontend unit-test suite. These are recorded limits; no extra implementation is included in this documentation pass.
+The direct detail URL lacks parameter-to-input wiring. There is no persisted store, multi-line UI editor or maintained frontend unit-test suite. These are recorded limits; no extra implementation is included in this documentation pass.
 
-Potential follow-up decisions are enum-value validation, route/body ID consistency, reference normalization, tax/rounding assumptions and user-facing status feedback. These are recommendations for review, not implemented changes or fabricated candidate reasoning. Client filtering is optional in the supplied brief.
+Potential follow-up decisions are reference normalization, tax/rounding assumptions and user-facing status feedback. These are recommendations for review, not implemented changes or fabricated candidate reasoning. Client filtering is optional in the supplied brief.
 
 ## AI assistance and final delivery
 
 [AI_ASSISTANCE.md](AI_ASSISTANCE.md) records the substantial assistant work, overbuilt frontend and rollback, subsequent user-led implementation, later requested additions, and validation repair. It distinguishes exact prompt excerpts from summaries.
 
-Clayton should review these factual notes and add his own explanation of decisions and tradeoffs. The final 5-10 minute narrated video link has not been supplied in this repository. GitHub access and final submission have not been verified or performed by the assistant.
+Clayton should review these factual notes and add his own explanation of decisions and tradeoffs. He confirms that the repository is public and the AI log has been reviewed. The final 5-10 minute narrated walkthrough is still outstanding, and its link has not been supplied in this repository. The assistant has not performed the final submission.
