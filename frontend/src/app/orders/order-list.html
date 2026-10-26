@@ -21,13 +21,13 @@
             <td>{{ order.externalReference }}</td>
             <td>{{ order.createdAt }}</td>
             <td>
-              <select class="select" (change)="updateStatus(order.id, $event)">
+              <select #statusSelect class="select" id="status-{{order.id}}" (change)="updateStatus(order.id, statusSelect.value)">
                 @for (status of statusOptions; track status) {
                   @if (status === order.status) {
-                    <option selected value="{{status}}}">{{status}}</option>
+                    <option selected value="{{status}}">{{status}}</option>
                   }
                   @else {
-                    <option value="{{status}}}">{{status}}</option>
+                    <option value="{{status}}">{{status}}</option>
                   }
                 }
               </select>

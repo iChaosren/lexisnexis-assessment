@@ -6,9 +6,9 @@ public sealed class OrderDb : IOrderDb
 {
     private ConcurrentDictionary<Guid, Order> orderList = new()
     {
-        [Guid.Parse("11111111-1111-4111-8111-111111111111")] = new Order
+        [Guid.NewGuid("TEST-ORDER-001")] = new Order
         {
-            Id = Guid.Parse("11111111-1111-4111-8111-111111111111"),
+            Id = Guid.NewGuid("TEST-ORDER-001"),
             ExternalReference = "TEST-ORDER-001",
             CustomerId = Guid.Parse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
             Customer = new Customer
@@ -32,9 +32,9 @@ public sealed class OrderDb : IOrderDb
                 }
             }
         },
-        [Guid.Parse("22222222-2222-4222-8222-222222222222")] = new Order
+        [Guid.NewGuid("TEST-ORDER-002")] = new Order
         {
-            Id = Guid.Parse("22222222-2222-4222-8222-222222222222"),
+            Id = Guid.NewGuid("TEST-ORDER-002"),
             ExternalReference = "TEST-ORDER-002",
             CustomerId = Guid.Parse("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
             Customer = new Customer

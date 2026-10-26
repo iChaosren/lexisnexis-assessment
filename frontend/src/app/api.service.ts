@@ -30,6 +30,6 @@ export class ApiService {
 
   // Assessment excerpt: “Optional if time permits: allow changing an order’s status from the UI or add simple client-side filtering.”
   changeOrderStatus(id: string, request: ChangeOrderStatusRequest): Observable<number> {
-    return this.http.patch<number>(`/api/orders/${id}.status`, request);
+    return this.http.patch<number>(`/api/orders/${id}/status`, request);
   }
 }

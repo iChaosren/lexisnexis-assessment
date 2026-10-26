@@ -1,5 +1,5 @@
-<div [class]="'modal ' + id() ? 'is-active' : ''" role="dialog" aria-modal="true" aria-labelledby="order-detail-title">
-  <div class="modal-background"></div>
+<div [class]="'modal ' + (id() ? 'is-active' : 'is-display-none')" role="dialog" aria-modal="true" [id]="id()"  aria-labelledby="order-detail-title">
+  <div class="modal-background" (click)="onClose.emit()"></div>
   <div class="modal-card">
     <header class="modal-card-head">
       <h2 class="modal-card-title" id="order-detail-title">Order Detail</h2>
@@ -17,27 +17,27 @@
           <dl class="columns is-multiline">
             <div class="column is-half">
               <dt class="has-text-weight-semibold">Reference</dt>
-              <dd>&mdash;</dd>
+              <dd>{{order()?.externalReference}}</dd>
             </div>
             <div class="column is-half">
               <dt class="has-text-weight-semibold">Status</dt>
-              <dd>&mdash;</dd>
+              <dd>{{order()?.status}}</dd>
             </div>
             <div class="column is-half">
               <dt class="has-text-weight-semibold">Customer</dt>
-              <dd>&mdash;</dd>
+              <dd>{{order()?.customer?.name}}</dd>
             </div>
             <div class="column is-half">
               <dt class="has-text-weight-semibold">Email</dt>
-              <dd>&mdash;</dd>
+              <dd>{{order()?.customer?.email}}</dd>
             </div>
             <div class="column is-half">
               <dt class="has-text-weight-semibold">Created</dt>
-              <dd>&mdash;</dd>
+              <dd>{{order()?.createdAt}}</dd>
             </div>
             <div class="column is-half">
               <dt class="has-text-weight-semibold">Currency</dt>
-              <dd>&mdash;</dd>
+              <dd>{{order()?.currency}}</dd>
             </div>
           </dl>
 
@@ -86,7 +86,7 @@
     }
 
     <footer class="modal-card-foot">
-      <button class="button" type="button">Close</button>
+      <button class="button" type="button" (click)="onClose.emit()">Close</button>
     </footer>
   </div>
 </div>

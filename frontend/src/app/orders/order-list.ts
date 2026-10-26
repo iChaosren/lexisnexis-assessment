@@ -37,7 +37,18 @@ export class OrderList implements OnInit {
     })
   }
 
-  updateStatus(orderId: string, event: Event) {
-
+  updateStatus(orderId: string, newStatus: string) {
+    this.api.changeOrderStatus(orderId, { orderId, newStatus: newStatus as OrderStatus })
+      .subscribe({
+        next: (updateCount) => {
+          if (!updateCount)
+            console.warn("No Change to Order Status");
+        },
+        error: (error) => {
+          console.error("Error Updating Order Status", error);
+        }
+      })
   }
+
+  protected readonly OrderStatus = OrderStatus;
 }
