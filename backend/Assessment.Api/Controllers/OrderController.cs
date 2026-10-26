@@ -8,7 +8,12 @@ public class OrderController(IOrderDb orderDb) : Controller
 {
     [HttpPost]
     public ActionResult<int> CreateOrder([FromBody] CreateOrderRequest dto)
-        => Ok(orderDb.Create(dto));
+    {
+        if (!orderDb.ListCustomers().Any(customer => customer.Id == dto.CustomerId))
+            return BadRequest("Choose an existing customer.");
+
+        return Ok(orderDb.Create(dto));
+    }
 
     [HttpGet]
     public ActionResult<OrderResponse[]> ListOrders()

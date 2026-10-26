@@ -1,12 +1,12 @@
 <h2 class="title is-3">New order</h2>
 
-<form class="box">
+<form class="box" [formGroup]="form" (ngSubmit)="submit()">
   <div class="columns">
     <div class="column">
       <div class="field">
         <label class="label" for="external-reference">Client reference</label>
         <div class="control">
-          <input class="input" id="external-reference" name="externalReference" type="text">
+          <input class="input" id="external-reference" name="externalReference" type="text" formControlName="externalReference">
         </div>
       </div>
     </div>
@@ -15,7 +15,7 @@
         <label class="label" for="currency">Currency</label>
         <div class="control">
           <div class="select is-fullwidth">
-            <select id="currency" name="currency">
+            <select id="currency" name="currency" formControlName="currency">
               <option value="">Choose currency</option>
               <option value="ZAR">ZAR</option>
               <option value="EUR">EUR</option>
@@ -27,43 +27,60 @@
     </div>
   </div>
 
-  <fieldset>
-    <legend class="title is-5">Line item</legend>
-    <div class="columns">
-      <div class="column">
-        <div class="field">
-          <label class="label" for="line-sku">SKU</label>
-          <div class="control">
-            <input class="input" id="line-sku" name="sku" type="text">
-          </div>
-        </div>
-      </div>
-      <div class="column">
-        <div class="field">
-          <label class="label" for="line-name">Item name</label>
-          <div class="control">
-            <input class="input" id="line-name" name="itemName" type="text">
-          </div>
-        </div>
-      </div>
-      <div class="column is-one-fifth">
-        <div class="field">
-          <label class="label" for="line-quantity">Quantity</label>
-          <div class="control">
-            <input class="input" id="line-quantity" name="quantity" type="number">
-          </div>
-        </div>
-      </div>
-      <div class="column is-one-fifth">
-        <div class="field">
-          <label class="label" for="line-price">Unit price</label>
-          <div class="control">
-            <input class="input" id="line-price" name="unitPrice" type="number" step="any">
-          </div>
-        </div>
+  <div class="field">
+    <label class="label" for="customer">Customer</label>
+    <div class="control">
+      <div class="select is-fullwidth">
+        <select id="customer" name="customerId" formControlName="customerId">
+          <option value="">Choose customer</option>
+          @for (customer of customers(); track customer.id) {
+            <option [value]="customer.id">{{ customer.name }}</option>
+          }
+        </select>
       </div>
     </div>
+  </div>
+
+  <fieldset formArrayName="lines">
+    <legend class="title is-5">Line item</legend>
+    @for (line of form.controls.lines.controls; track line; let i = $index) {
+      <div class="columns" [formGroupName]="i">
+        <div class="column">
+          <div class="field">
+            <label class="label" for="line-sku-{{i}}">SKU</label>
+            <div class="control">
+              <input class="input" id="line-sku-{{i}}" name="sku" type="text" formControlName="sku">
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label" for="line-name-{{i}}">Item name</label>
+            <div class="control">
+              <input class="input" id="line-name-{{i}}" name="itemName" type="text" formControlName="name">
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-fifth">
+          <div class="field">
+            <label class="label" for="line-quantity-{{i}}">Quantity</label>
+            <div class="control">
+              <input class="input" id="line-quantity-{{i}}" name="quantity" type="number" formControlName="quantity">
+            </div>
+          </div>
+        </div>
+        <div class="column is-one-fifth">
+          <div class="field">
+            <label class="label" for="line-price-{{i}}">Unit price</label>
+            <div class="control">
+              <input class="input" id="line-price-{{i}}" name="unitPrice" type="number" step="any" formControlName="unitPrice">
+            </div>
+          </div>
+        </div>
+      </div>
+    }
   </fieldset>
 
-  <button class="button is-primary mt-4" type="button">Submit order</button>
+  <button class="button is-primary mt-4" type="submit" [disabled]="submitting()">Submit order</button>
+  <p class="mt-4" role="status">{{ submissionMessage() }}</p>
 </form>

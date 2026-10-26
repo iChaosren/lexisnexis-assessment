@@ -61,7 +61,20 @@ public sealed class OrderDb : IOrderDb
     };
     
     public int Create(CreateOrderRequest dto)
-        => orderList.TryAdd(Guid.NewGuid(dto.ExternalReference), new Order(dto)) ? 1 : 0;
+    {
+        var customer = orderList.Values.Select(order => order.Customer)
+            .First(customer => customer.Id == dto.CustomerId);
+
+        return orderList.TryAdd(Guid.NewGuid(dto.ExternalReference), new Order(dto)
+        {
+            CustomerId = customer.Id,
+            Customer = customer
+        }) ? 1 : 0;
+    }
+
+    public CustomerResponse[] ListCustomers()
+        => orderList.Values.Select(order => order.Customer)
+            .DistinctBy(customer => customer.Id).Select(customer => customer.ToDto()).ToArray();
 
     public OrderResponse[] ListOrders()
         => orderList.Values.OrderByDescending(o => o.CreatedAt).Select(o => o.ToDto()).ToArray();

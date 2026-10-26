@@ -5,6 +5,8 @@ public sealed class CreateOrderRequest
 {
     public required string ExternalReference { get; set; }
 
+    public Guid CustomerId { get; set; }
+
     public Currency Currency { get; set; }
 
     public List<CreateOrderLineRequest> Lines { get; set; } = new();

@@ -7,8 +7,8 @@ namespace Assessment.Api.Tests;
 // Direct action tests use a fresh real in-memory store; MVC behavior is tested separately.
 public class OrderControllerTests
 {
-    private static readonly Guid PendingOrderId = Guid.Parse("11111111-1111-4111-8111-111111111111");
-    private static readonly Guid ConfirmedOrderId = Guid.Parse("22222222-2222-4222-8222-222222222222");
+    private static readonly Guid PendingOrderId = Guid.NewGuid("TEST-ORDER-001");
+    private static readonly Guid ConfirmedOrderId = Guid.NewGuid("TEST-ORDER-002");
     private static readonly Guid UnknownOrderId = Guid.Parse("ffffffff-ffff-4fff-8fff-ffffffffffff");
 
     [Theory]
@@ -101,12 +101,17 @@ public class OrderControllerTests
     {
         var controller = new OrderController(new OrderDb());
         var request = NewOrder();
+        request.CustomerId = Guid.Parse("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
         Assert.Equal(1, OkValue(controller.CreateOrder(request)));
 
         var result = controller.GetOrder(Guid.NewGuid(request.ExternalReference));
 
         var order = OkValue(result);
         Assert.Equal(request.ExternalReference, order.ExternalReference);
+        Assert.Equal(request.CustomerId, order.CustomerId);
+        Assert.Equal(request.CustomerId, order.Customer.Id);
+        Assert.Equal("Test Customer Two", order.Customer.Name);
+        Assert.Equal("customer.two@example.invalid", order.Customer.Email);
         Assert.Equal(20m, Assert.Single(order.Lines).LineTotal);
         Assert.Equal(20m, order.SubTotal);
         Assert.Equal(3m, order.Tax);
@@ -206,6 +211,7 @@ public class OrderControllerTests
         => new()
         {
             ExternalReference = reference,
+            CustomerId = Guid.Parse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
             Currency = Currency.ZAR,
             Lines = new List<CreateOrderLineRequest>
             {

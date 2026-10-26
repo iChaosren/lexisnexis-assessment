@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Assessment.Api.Dto;
 using Microsoft.AspNetCore.Mvc.Testing;
 
@@ -11,7 +12,8 @@ public class OrderEndpointTests
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
-        IncludeFields = true
+        IncludeFields = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public static TheoryData<CreateOrderLineRequest> InvalidLines => new()
@@ -27,7 +29,7 @@ public class OrderEndpointTests
         await using var application = new WebApplicationFactory<Program>();
         using var client = application.CreateClient();
 
-        using var response = await client.GetAsync("/api/orders/11111111-1111-4111-8111-111111111111");
+        using var response = await client.GetAsync($"/api/orders/{Guid.NewGuid("TEST-ORDER-001")}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var order = await response.Content.ReadFromJsonAsync<OrderResponse>(JsonOptions);
@@ -59,6 +61,7 @@ public class OrderEndpointTests
         var request = new CreateOrderRequest
         {
             ExternalReference = "HTTP-VALIDATION",
+            CustomerId = Guid.Parse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
             Currency = Currency.ZAR,
             Lines = new List<CreateOrderLineRequest> { line }
         };
@@ -77,6 +80,7 @@ public class OrderEndpointTests
         var request = new
         {
             ExternalReference = "HTTP-FRACTIONAL",
+            CustomerId = Guid.Parse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
             Currency = Currency.ZAR,
             Lines = new[]
             {
@@ -96,7 +100,7 @@ public class OrderEndpointTests
         using var client = application.CreateClient();
         var request = new ChangeOrderStatusRequest
         {
-            OrderId = Guid.Parse("11111111-1111-4111-8111-111111111111"),
+            OrderId = Guid.NewGuid("TEST-ORDER-001"),
             NewStatus = (OrderStatus)999
         };
 
@@ -112,7 +116,7 @@ public class OrderEndpointTests
         using var client = application.CreateClient();
         var request = new ChangeOrderStatusRequest
         {
-            OrderId = Guid.Parse("22222222-2222-4222-8222-222222222222"),
+            OrderId = Guid.NewGuid("TEST-ORDER-002"),
             NewStatus = OrderStatus.Pending
         };
 

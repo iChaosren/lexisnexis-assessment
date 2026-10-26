@@ -4,6 +4,7 @@ import { ChangeOrderStatusRequest } from './dtos/change-order-status-request';
 import { CreateOrderRequest } from './dtos/create-order-request';
 import { OrderResponse } from './dtos/order-response';
 import {HttpClient} from '@angular/common/http';
+import {CustomerResponse} from './dtos/customer-response';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -11,6 +12,10 @@ export class ApiService {
 
   health(): Observable<string> {
     return this.http.get<string>(`/api/health`)
+  }
+
+  listCustomers(): Observable<CustomerResponse[]> {
+    return this.http.get<CustomerResponse[]>(`/api/customers`);
   }
 
   // Assessment excerpt: “Provides a simple way to submit a new order.”

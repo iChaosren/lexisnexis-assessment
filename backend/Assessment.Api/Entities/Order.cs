@@ -44,11 +44,11 @@ public sealed class Order : IMapToDto<OrderResponse>
 
     public Order UpdateStatus(ChangeOrderStatusRequest dto)
     {
-        if (this.Status is OrderStatus.Cancelled or OrderStatus.Fulfilled)
-            throw new ArgumentException("Cannot update fullfilled/cancelled orders");
+        //if (this.Status is OrderStatus.Cancelled or OrderStatus.Fulfilled)
+        //    throw new ArgumentException("Cannot update fullfilled/cancelled orders");
         
-        if (dto.NewStatus == OrderStatus.Pending)
-            throw new ArgumentException("Cannot update orders to pending");
+        //if (dto.NewStatus == OrderStatus.Pending)
+        //    throw new ArgumentException("Cannot update orders to pending");
 
         var clone = (Order)this.MemberwiseClone();
         clone.Status = dto.NewStatus;
