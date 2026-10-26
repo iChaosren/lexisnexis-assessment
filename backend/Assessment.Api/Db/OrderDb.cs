@@ -62,22 +62,31 @@ public sealed class OrderDb : IOrderDb
     
     public int Create(CreateOrderRequest dto)
     {
-        var customer = orderList.Values.Select(order => order.Customer)
+        var customer = orderList.Values
+            .Select(order => order.Customer)
             .First(customer => customer.Id == dto.CustomerId);
 
-        return orderList.TryAdd(Guid.NewGuid(dto.ExternalReference), new Order(dto)
-        {
-            CustomerId = customer.Id,
-            Customer = customer
-        }) ? 1 : 0;
+        return orderList.TryAdd(
+            Guid.NewGuid(dto.ExternalReference),
+            new Order(dto) 
+            {
+                CustomerId = customer.Id,
+                Customer = customer
+            }) ? 1 : 0;
     }
 
     public CustomerResponse[] ListCustomers()
-        => orderList.Values.Select(order => order.Customer)
-            .DistinctBy(customer => customer.Id).Select(customer => customer.ToDto()).ToArray();
+        => orderList.Values
+            .Select(order => order.Customer)
+            .DistinctBy(customer => customer.Id)
+            .Select(customer => customer.ToDto())
+            .ToArray();
 
     public OrderResponse[] ListOrders()
-        => orderList.Values.OrderByDescending(o => o.CreatedAt).Select(o => o.ToDto()).ToArray();
+        => orderList.Values
+            .OrderByDescending(o => o.CreatedAt)
+            .Select(o => o.ToDto())
+            .ToArray();
     
     public OrderResponse? GetOrder(Guid orderId)
         => orderList.TryGetValue(orderId, out Order? value) ? value.ToDto() : null;
